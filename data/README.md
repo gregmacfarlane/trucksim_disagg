@@ -10,3 +10,7 @@ folder:
 If the `flows_to_trucks.R` script ran successfully, this folder should contain:
 
   - `faf_trucks.Rdata`
+  
+If the `split_trucks.R` script ran successfully, this folder should contain:
+
+  - `disaggregated_trucks.Rdata`

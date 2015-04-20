@@ -1,0 +1,9 @@
+.Rproj.user
+.Rhistory
+.RData
+faf35_data.csv
+data/cbp_data.Rdata
+data/faf_data.Rdata
+data/faf_data_full.Rdata
+.README.md.swp
+trucksim_disagg.Rproj

@@ -14,3 +14,7 @@ If the `flows_to_trucks.R` script ran successfully, this folder should contain:
 If the `split_trucks.R` script ran successfully, this folder should contain:
 
   - `disaggregated_trucks.Rdata`
+
+If the `plans_writer.R` script ran successfully, this folder should contain:
+
+  - `truck_plans.Rdata`

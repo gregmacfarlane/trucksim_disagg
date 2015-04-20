@@ -71,7 +71,7 @@ addPersonXMLString <- function(dfrow){
 
 # MAIN PROGRAM =================================================================
 cat("Reading distributed truck flows\n")
-load("./data/dividedtrucks.Rdata")
+load("./data/disaggregated_trucks.Rdata")
 FAF <- FAF %>% mutate(id = seq(1:nrow(FAF))) %>% 
   arrange(id) %>% filter(trucks > 0) 
 
@@ -89,7 +89,7 @@ FAF <- FAF %>%
          id = seq(1:nrow(FAF))) %>%
   sample_frac(0.03) # sample 3% of the records
 
-save(FAF, file = "./data/TruckPlans.Rdata")
+save(FAF, file = "./data/truck_plans.Rdata")
 cat("Writing to XML\n")
 # Create xml representation of truck plans
 suppressMessages(plans <- unlist(mclapply(split(FAF, FAF$sctg), mc.cores = cores,
@@ -102,5 +102,5 @@ header <- paste(
 
 tail <- "</population>"
 
-cat(header, plans, tail, file = "./Simulation/inputs/plans.xml")
+cat(header, plans, tail, file = "./plans.xml")
 

@@ -40,7 +40,7 @@ FAF <- reshape(FAF, dir = "long", varying = 10:ncol(FAF),
 
 # Create a simulation from just RDU for testing
 if(small == "True"){
-  test <- FAF %>%
+  FAF <- FAF %>%
     filter(dms_orig == "373" | dms_dest == "373")
 }
 

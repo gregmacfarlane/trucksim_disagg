@@ -6,3 +6,7 @@ folder:
 
   - `cbp_data.Rdata`
   - `faf_data.Rdata`
+  
+If the `flows_to_trucks.R` script ran successfully, this folder should contain:
+
+  - `faf_trucks.Rdata`

@@ -42,12 +42,12 @@ cat("Calculating truck productions coefficients\n")
 # these tables to the FAF data we also need the lookup table of counties to 
 # FAF zones.
 
-load("./data/CBPData.Rdata")
-load("./data/io/MakeTable.Rdata")
+load("./data/cbp_data.Rdata")
+load("./data/io/make_table.Rdata")
 WGS84 <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 LCC <- CRS("+proj=lcc +lat_1=49 +lat_2=45 +lat_0=44.25 +lon_0=-109.5 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs")
 
-cnty2faf <- readShapePoints("./data/shapefiles/cnty2faf.shp",
+cnty2faf <- readShapePoints("./data_raw/shapefiles/cnty2faf.shp",
                             proj4string = WGS84)
 cnty2faf <- spTransform(cnty2faf, LCC)
 
@@ -67,7 +67,8 @@ CountyLabor <- inner_join(CBP, maketable, by = "naics") %>%
   mutate(F3Z = as.character(F3Z)) %>%
   group_by(F3Z, sctg) %>% 
   mutate(prob = emp/sum(emp), name = GEOID, mode = 0) %>% ungroup() %>%
-  select(lat, long, sctg, name, prob, mode, F3Z)
+  select(lat, long, sctg, name, prob, mode, F3Z) %>%
+  tbl_df()
 
 
 
@@ -78,7 +79,7 @@ cat("Calculating truck attractions coefficients\n")
 # national county business patterns (where industries are located), Table 7
 # of the commodity flow survey (which industries create commodities), and national
 # IO tables (which industries buy stuff from other industries). 
-load("./data/io/UseTable.Rdata")
+load("./data/io/use_table.Rdata")
 
 CountyDemand <- inner_join(CBP, usetable, by = "naics") %>%
   # employment in industry-commodity pair
@@ -90,7 +91,8 @@ CountyDemand <- inner_join(CBP, usetable, by = "naics") %>%
   mutate(F3Z = as.character(F3Z)) %>%
   group_by(F3Z, sctg) %>% 
   mutate(prob = emp/sum(emp), name = GEOID, mode = 0) %>% ungroup(.) %>%
-  select(lat, long, sctg, name, prob, mode, F3Z)
+  select(lat, long, sctg, name, prob, mode, F3Z) %>%
+  tbl_df()
 
 # Imports and Exports ----------------------------------------------------------
 cat("Determining import and export nodes\n")
@@ -102,11 +104,12 @@ cat("Determining import and export nodes\n")
 
 # First, we load the shapefiles for ports, airports, and border crossings and
 # determine which FAF zone they are located in.
-FAFzones <- readShapePoly("./data/shapefiles/faf3zone.shp", proj4string = WGS84)
+FAFzones <- readShapePoly("./data_raw/shapefiles/faf3zone.shp", 
+                          proj4string = WGS84)
 FAFzones <- spTransform(FAFzones, LCC)
 
 # Seaports
-seaports <- readShapePoints("./data/shapefiles/NTAD/ports_major.shp",
+seaports <- readShapePoints("./data_raw/shapefiles/ntad/ports_major.shp",
                             proj4string = WGS84)
 seaports <- spTransform(seaports, LCC)
 seaports$F3Z <- over(seaports, FAFzones)$F3Z
@@ -118,12 +121,12 @@ seaports <- seaports@data %>%
   filter(prob > 0) %>% select(lat, long, name, prob, mode, F3Z) 
 
 # Airports
-airports <- readShapePoints("./data/shapefiles/NTAD/airports.shp",
+airports <- readShapePoints("./data_raw/shapefiles/ntad/airports.shp",
                             proj4string = WGS84)
 airports <- spTransform(airports, LCC)
 airports$F3Z <- over(airports, FAFzones)$F3Z
-airfreight <- read.csv("./data/2006-2010AirFreight.txt", sep = "#", 
-                       stringsAsFactors = FALSE) %>%
+airfreight <- read.csv("./data_raw/shapefiles/ntad/2006-2010AirFreight.txt", 
+                       sep = "#",  stringsAsFactors = FALSE) %>%
   mutate(Year = substr(Date, 0, 4), name = substr(Origin, 0,3)) %>%
   filter(Year == "2007") %>%  group_by(name) %>% 
   summarise(freight = sum(Total))
@@ -136,7 +139,7 @@ airports <- airports@data %>%
 
 
 # Border crossings
-crossings <- readShapePoints("./data/shapefiles/NTAD/border_x.shp",
+crossings <- readShapePoints("./data_raw/shapefiles/ntad/border_x.shp",
                              proj4string = WGS84)
 crossings <- spTransform(crossings, LCC)
 crossings$F3Z <- over(crossings, FAFzones)$F3Z
@@ -163,7 +166,7 @@ cat("Allocating trucks to origins\n")
 # each point. To limit the amount of data splitting and recombining, we want 
 # to split origins at once; this requires that we consolidate import and domestic
 # mode information into a single variable
-load("./data/processedfafdata.Rdata")
+load("./data/faf_trucks.Rdata")
 FAF <- FAF %>% ungroup() %>%
   mutate(id = 1:nrow(FAF),
          inmode = ifelse(is.na(fr_inmode), 0, fr_inmode),
@@ -227,5 +230,5 @@ FAF <- FAF %>%
 
 
 cat("Writing to file\n")
-save(FAF, file = "data/dividedtrucks.Rdata")
+save(FAF, file = "./data/disaggregated_trucks.Rdata")
 

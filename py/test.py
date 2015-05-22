@@ -1,9 +1,9 @@
 import pandas as pd
+import numpy as np
+import xml.etree.ElementTree as et
 
 
-# trucks = pd.read_csv("./data/faf_trucks.csv")
 
-class TruckPlan:
 def get_start_day():
     """
     :return: a random day of the week. For now all days are the same,
@@ -30,7 +30,8 @@ def get_departure_time():
     return int(y)
 
 
-    'Critical information for the truck plan'
+class TruckPlan:
+    """Critical information for the truck plan"""
     truckCount = 0
 
     def __init__(self, id, origin, destination, sctg, type, full):
@@ -40,10 +41,17 @@ def get_departure_time():
         self.sctg = sctg
         self.type = type
         self.full = full
+        self.time = None
         TruckPlan.truckCount += 1
 
+        # get the departure time
+        self.get_time()
+
+
+
     def display_count(self):
-        print "Total number of trucks: %d" % TruckPlan.truckCount
+        print "Total number of trucks: ", TruckPlan.truckCount
+
 
     def display_plan(self):
         print "Origin: ", self.origin, "Destination", self.destination
@@ -52,16 +60,22 @@ def get_departure_time():
         print "Commodity: ", self.sctg, "Full? ", self.full, "Vehicle: ", self.type
 
 
+    def get_origin(self):
+        print "origin"
 
-def get_ods(trucks_table, i):
-
-    """
-    Given a number of trucks between two different FAF zones,
-    create a plan for each
-    """
-
-t1 = TruckPlan(1, 20, 21, "a", "v", False)
-t2 = TruckPlan(2, 20, 21, "a", "v", False)
+    def get_destination(self):
+        print "destination"
 
 
-t1.display_count()
+    def get_time(self):
+        "What time does the truck leave?"
+        self.time = get_start_day() * 3600 + get_departure_time()
+
+
+t1 = TruckPlan(1)
+print(t1.time)
+
+print "Truck plans created: ", TruckPlan.truckCount
+
+
+

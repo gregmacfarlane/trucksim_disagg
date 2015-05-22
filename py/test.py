@@ -3,6 +3,30 @@ import numpy as np
 import xml.etree.ElementTree as et
 
 
+# Read in the lookup tables for the origins and the destinations.
+MAKE_TABLE = pd.read_csv(
+    "./data/make_table.csv",
+    dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
+)
+
+USE_TABLE = pd.read_csv(
+    "./data/use_table.csv",
+    dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
+)
+
+
+def pick_county(zone, sctg, df):
+    """
+    :param zone: the original FAF Zone O or D for the truck
+    :param sctg: the commodity code for the truck's cargo
+    :param df: the appropriate lookup table
+    :return: the O or D county FIPS code
+    """
+    # get the relevant county lookup table
+    df = df[df['F3Z'] == zone]
+    df = df[df['sctg'] == sctg]
+    county = np.random.choice(df['name'], p=df['prob'])
+    return county
 
 def get_start_day():
     """
@@ -34,46 +58,35 @@ class TruckPlan:
     """Critical information for the truck plan"""
     truckCount = 0
 
-    def __init__(self, id, origin, destination, sctg, type, full):
+    def __init__(self, id, origin, destination, sctg):
+        TruckPlan.truckCount += 1
         self.id = id
         self.origin = origin
         self.destination = destination
         self.sctg = sctg
-        self.type = type
-        self.full = full
-        self.time = None
-        TruckPlan.truckCount += 1
 
         # get the departure time
         self.get_time()
 
-
-
-    def display_count(self):
-        print "Total number of trucks: ", TruckPlan.truckCount
-
+        # get the origin and destination counties
+        self.get_origin()
+        self.get_destination()
 
     def display_plan(self):
         print "Origin: ", self.origin, "Destination", self.destination
 
-    def display_cargo(self):
-        print "Commodity: ", self.sctg, "Full? ", self.full, "Vehicle: ", self.type
-
-
     def get_origin(self):
-        print "origin"
+        self.origin = pick_county(self.origin, self.sctg, MAKE_TABLE)
 
     def get_destination(self):
-        print "destination"
-
+        self.destination = pick_county(self.destination, self.sctg, USE_TABLE)
 
     def get_time(self):
         "What time does the truck leave?"
         self.time = get_start_day() * 3600 + get_departure_time()
 
 
-t1 = TruckPlan(1)
-print(t1.time)
+t1 = TruckPlan(1, "19", "371", "01")
 
 print "Truck plans created: ", TruckPlan.truckCount
 

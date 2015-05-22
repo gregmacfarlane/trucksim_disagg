@@ -39,8 +39,8 @@ def get_departure_time():
     """
     :return: a random time in the day, bimodally distributed.
     """
-    y0 = np.random.randn(9, 2.5)
-    y1 = np.random.randn(16, 2.5)
+    y0 = np.random.normal(9, 2.5)
+    y1 = np.random.normal(16, 2.5)
     flag = np.random.binomial(1, 0.5)
     y = y0 * (1 - flag) + y1 * flag
     if y < 0:

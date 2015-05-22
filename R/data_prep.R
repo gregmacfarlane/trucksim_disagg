@@ -35,6 +35,11 @@ FAF <- reshape(FAF, dir = "long", varying = 10:ncol(FAF),
          id = as.character(id),
          dms_orig = as.character(dms_orig),
          dms_dest = as.character(dms_dest)) %>%
+  #filter out trucks exclusively in Hawaii or Alaska Alaska is zone 20, and 
+  # Hawaii is in two zones, 151 and 159.
+  filter(!(dms_orig == "20" & dms_dest == "20")) %>% 
+  filter(!(dms_orig %in% c("151", "159") & dms_dest %in% c("151", "159"))) %>% 
+  
   filter(time == year, dms_mode == 1) %>% # chosen year and trucks only.
   select(-sctg2, -tmiles) 
 

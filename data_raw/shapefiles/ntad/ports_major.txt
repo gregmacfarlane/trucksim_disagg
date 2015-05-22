@@ -1,0 +1,272 @@
+﻿<metadata>
+  <idinfo>
+    <citation>
+      <citeinfo>
+        <origin>Waterborne Commerce Statistics Center, US Army Corps of Engineers</origin>
+        <pubdate>20130701</pubdate>
+        <title>ports_major v. 2</title>
+        <geoform>vector digital data</geoform>
+        <onlink>http://www.bts.gov/programs/geographic_information_services/</onlink>
+      </citeinfo>
+    </citation>
+    <descript>
+      <abstract>The ports are politically defined by port limits or Corps projects, excluding non-Corps projects not authorized for publication. The determination for the published Principal Ports is based upon the total tonnage for the port for the particular year; therefore the top 150 list can vary from year to year.</abstract>
+      <purpose>The Principal Port file contains USACE port codes, geographic locations(longitude, latitude), names, and commodity tonnage summaries (total tons, domestic, foreign, imports and exports) for Principal USACE Ports.</purpose>
+      <supplinf>File Format: ASCII Comma Delimited and dBase Maximum Characters per Record: 96 Media: CD, disk, tape, hardcopy</supplinf>
+    </descript>
+    <spdom>
+      <bounding>
+        <westbc>-168.938200</westbc>
+        <eastbc>-66.166670</eastbc>
+        <northbc>67.719180</northbc>
+        <southbc>18.001260</southbc>
+      </bounding>
+    </spdom>
+    <keywords>
+      <theme>
+        <themekt>None</themekt>
+        <themekey>commerce</themekey>
+        <themekey>USACE</themekey>
+        <themekey>Major Ports</themekey>
+        <themekey>Shipping</themekey>
+        <themekey>Ports</themekey>
+        <themekey>economy</themekey>
+      </theme>
+      <theme>
+        <themekt>ISO 19115 Topic Categories</themekt>
+        <themekey>transportation</themekey>
+        <themekey>oceans</themekey>
+        <themekey>inlandWaters</themekey>
+        <themekey>economy</themekey>
+        <themekey>structure</themekey>
+	<themekey>NGDA</themekey>
+	<themekey>Transportation Theme</themekey>
+      </theme>
+      <place>
+        <placekt>None</placekt>
+        <placekey>spatial</placekey>
+        <placekey>US</placekey>
+        <placekey>geographic</placekey>
+        <placekey>ports</placekey>
+      </place>
+      <temporal>
+        <tempkt>None</tempkt>
+        <tempkey>2013</tempkey>
+        <tempkey>2014</tempkey>
+      </temporal>
+    </keywords>
+    <accconst>None</accconst>
+    <useconst>See access and use constraints information.</useconst>
+    <ptcontac>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>Waterborne Commerce Statistics Center, US Army Corps of Engineers</cntorg>
+        </cntorgp>
+      </cntinfo>
+    </ptcontac>
+    <datacred>U.S. Army Corps of Engineers, Navigation Data Center, Waterborne Commerce Statistics Center, New Orleans, LA.</datacred>
+    <native>Microsoft Windows 7 Version 6.1 (Build 7601) Service Pack 1; Esri ArcGIS 10.1.0.3035</native>
+    <crossref>
+      <citeinfo>
+        <title>National Transportation Atlas Databases (NTAD) 2014</title>
+      </citeinfo>
+    </crossref>
+  </idinfo>
+  <spdoinfo>
+    <direct>Vector</direct>
+    <ptvctinf>
+      <sdtsterm>
+        <sdtstype>Entity point</sdtstype>
+        <ptvctcnt>150</ptvctcnt>
+      </sdtsterm>
+    </ptvctinf>
+  </spdoinfo>
+  <spref>
+    <horizsys>
+      <geograph>
+        <latres>8.983152841195215e-009</latres>
+        <longres>8.983152841195215e-009</longres>
+        <geogunit>Decimal Degrees</geogunit>
+      </geograph>
+      <geodetic>
+        <horizdn>D WGS 1984</horizdn>
+        <ellips>WGS 1984</ellips>
+        <semiaxis>6378137.0</semiaxis>
+        <denflat>298.257223563</denflat>
+      </geodetic>
+    </horizsys>
+  </spref>
+  <eainfo>
+    <detailed>
+      <enttyp>
+        <enttypl>ports_major</enttypl>
+        <enttypd>150 tops ports</enttypd>
+        <enttypds>USACE</enttypds>
+      </enttyp>
+      <attr>
+        <attrlabl>FID</attrlabl>
+        <attrdef>sequential number</attrdef>
+        <attrdefs>esri</attrdefs>
+        <attrdomv>
+          <udom>Sequential unique whole numbers that are automatically generated.</udom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>Shape</attrlabl>
+        <attrdef>type of geospatial feature</attrdef>
+        <attrdefs>esri</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>Point</edomv>
+            <edomvd>feature type</edomvd>
+            <edomvds>esri</edomvds>
+          </edom>
+          <udom>Coordinates defining the features.</udom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>PORT</attrlabl>
+        <attrdef>USACE assigned port code identifier.</attrdef>
+        <attrdefs>USACE</attrdefs>
+      </attr>
+      <attr>
+        <attrlabl>LONGITUDE1</attrlabl>
+        <attrdef>Longitude</attrdef>
+        <attrdefs>USACE</attrdefs>
+      </attr>
+      <attr>
+        <attrlabl>LATITUDE11</attrlabl>
+        <attrdef>Latitude</attrdef>
+        <attrdefs>USACE</attrdefs>
+      </attr>
+      <attr>
+        <attrlabl>PORT_NAME</attrlabl>
+        <attrdef>Port name</attrdef>
+        <attrdefs>USACE</attrdefs>
+      </attr>
+      <attr>
+        <attrlabl>TOTAL</attrlabl>
+        <attrdef>Commidity tonnage total.</attrdef>
+        <attrdefs>USACE</attrdefs>
+      </attr>
+      <attr>
+        <attrlabl>DOMESTIC</attrlabl>
+        <attrdef>Commodity tonnage domestic.</attrdef>
+        <attrdefs>USACE</attrdefs>
+      </attr>
+      <attr>
+        <attrlabl>FOREIGN</attrlabl>
+        <attrdef>Commodity tonnage foreign.</attrdef>
+        <attrdefs>USACE</attrdefs>
+      </attr>
+      <attr>
+        <attrlabl>IMPORTS</attrlabl>
+        <attrdef>Commodity tonnge imports to port.</attrdef>
+        <attrdefs>USACE</attrdefs>
+      </attr>
+      <attr>
+        <attrlabl>EXPORTS</attrlabl>
+        <attrdef>Commodity tonnage exports from port.</attrdef>
+        <attrdefs>USACE</attrdefs>
+      </attr>
+      <attr>
+        <attrlabl>STPOSTAL</attrlabl>
+        <attrdef>U.S. Postal Service two letter state abbreviation</attrdef>
+        <attrdefs>USPS</attrdefs>
+        <attrdomv>
+          <codesetd>
+            <codesetn>Official List of State Postal Abbreviations</codesetn>
+            <codesets>U.S. Postal Service</codesets>
+          </codesetd>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>STFIPS</attrlabl>
+        <attrdef>State FIPS code</attrdef>
+        <attrdefs>NIST</attrdefs>
+        <attrdomv>
+          <codesetd>
+            <codesetn>Federal Information Processing Standard (FIPS), Publication 6-4</codesetn>
+            <codesets>National Institute for Standards and Technology (NIST)</codesets>
+          </codesetd>
+        </attrdomv>
+      </attr>
+    </detailed>
+  </eainfo>
+  <distinfo>
+    <distrib>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>US Army Corps of Engineers</cntorg>
+          <cntper>Waterborne Commerce Statistics Center</cntper>
+        </cntorgp>
+        <cntaddr>
+          <addrtype>unknown</addrtype>
+          <address>PO BOX 61280</address>
+          <city>New Orleans,</city>
+          <state>LA</state>
+          <postal>70161-1280</postal>
+        </cntaddr>
+        <cntvoice>504-862-1426 or 504-862-1441</cntvoice>
+        <cntemail>CEIWR-NDCWCSC.WEBMASTER@usace.army.mil</cntemail>
+      </cntinfo>
+    </distrib>
+    <distliab>See access and use constraints information.</distliab>
+  </distinfo>
+  <distinfo>
+    <distrib>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>Office of the Assistant Secretary for Research and Technology/Bureau of Transportation Statistics</cntorg>
+          <cntper>National Transportation Atlas Database (NTAD) 2014</cntper>
+        </cntorgp>
+        <cntpos>Geospatial Information Systems</cntpos>
+        <cntaddr>
+          <addrtype>unknown</addrtype>
+          <address>1200 New Jersey Ave. SE</address>
+          <city>Washington</city>
+          <state>DC</state>
+          <postal>20590</postal>
+        </cntaddr>
+        <cntvoice>202-366-DATA</cntvoice>
+        <cntemail>answers@BTS.gov</cntemail>
+      </cntinfo>
+    </distrib>
+    <resdesc>National Transportation Atlas Databases (NTAD) 2014</resdesc>
+    <distliab>See access and use constraints information.</distliab>
+    <stdorder>
+      <digform>
+        <digtinfo>
+          <formname>ESRI Shapefile</formname>
+          <formvern>2013</formvern>
+        </digtinfo>
+        <digtopt>
+          <offoptn>
+            <offmedia>dvd</offmedia>
+          </offoptn>
+        </digtopt>
+      </digform>
+      <ordering>Call (202-366-DATA), or E-mail (answers@bts.gov) BTS to request the National Transportation Atlas Databases (NTAD) 2014 DVD. The NTAD DVD can be ordered from the online bookstore at www.bts.gov. Individual datasets from the NTAD can also be downloaded from the Office of Geospatial Information Systems website at http://www.bts.gov/programs/geographic_information_services/</ordering>
+    </stdorder>
+  </distinfo>
+  <metainfo>
+    <metd>20140410</metd>
+    <metc>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>US Army Corps of Engineers</cntorg>
+          <cntper>Waterborne Commerce Statistics Center</cntper>
+        </cntorgp>
+        <cntaddr>
+          <addrtype>mailing and physical</addrtype>
+          <city>Vicksburg</city>
+          <state>MS</state>
+          <country>US</country>
+        </cntaddr>
+      </cntinfo>
+    </metc>
+    <metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+    <metstdv>FGDC-STD-001-1998</metstdv>
+    <mettc>local time</mettc>
+  </metainfo>
+</metadata>

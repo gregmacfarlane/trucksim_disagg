@@ -4,6 +4,7 @@
 # based on county business patterns and macroeconomic IO tables.
 library(methods)
 suppressPackageStartupMessages(require(dplyr))
+suppressPackageStartupMessages(require(dplyrExtras))
 suppressPackageStartupMessages(require(foreign))
 suppressPackageStartupMessages(require(reshape2))
 suppressPackageStartupMessages(require(maptools))
@@ -45,29 +46,41 @@ cat("Calculating truck productions coefficients\n")
 load("./data/cbp_data.Rdata")
 load("./data/io/make_table.Rdata")
 WGS84 <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
-LCC <- CRS("+proj=lcc +lat_1=49 +lat_2=45 +lat_0=44.25 +lon_0=-109.5 +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs")
 
 cnty2faf <- readShapePoints("./data_raw/shapefiles/cnty2faf.shp",
                             proj4string = WGS84)
-cnty2faf <- spTransform(cnty2faf, LCC)
 
 cnty2faf <- cnty2faf@data %>%
-  mutate(long = cnty2faf@coords[,1], lat = cnty2faf@coords[,2]) %>%
-  select(long, lat, GEOID, F3Z)
+  select(GEOID, F3Z)
   
-# Lookup table with the number of employees in every county making a commodity
-# as a percent of the total employees making that commodity in the FAF zone.
+# Lookup table with the probability of a county within a FAF zone producing
+# a given commodity determined as the county's share of relevant NAICS 
+# employment. 
 CountyLabor <- inner_join(CBP, maketable, by = "naics") %>%
+  
   # employment in industry-commodity pair
-  mutate(emp = emp * makecoef) %>% group_by(GEOID, sctg)    %>%
-  # employment making commodity, summed across industries within county
-  summarise(emp = sum(emp)) %>% ungroup(.) %>%
-  # join county-FAF crosswalk
+  mutate(emp = emp * makecoef) %>% 
+  
+  # All employees making commodity in the county
+  group_by(GEOID, sctg) %>%
+  summarise(emp = sum(emp)) %>% 
+  ungroup(.) %>%
+  
+  # which FAF zone is the county in?
   left_join(., cnty2faf, by = "GEOID") %>%
   mutate(F3Z = as.character(F3Z)) %>%
+  
+  # What is the county's share of the FAF-zone employment?
   group_by(F3Z, sctg) %>% 
-  mutate(prob = emp/sum(emp), name = GEOID, mode = 0) %>% ungroup() %>%
-  select(lat, long, sctg, name, prob, mode, F3Z) %>%
+  mutate(
+    prob = emp/sum(emp), 
+    # origin name
+    name = GEOID, 
+    # travel mode
+    mode = 0) %>% ungroup() %>%
+  
+  # cleanup
+  select(sctg, name, prob, mode, F3Z) %>%
   tbl_df()
 
 
@@ -82,16 +95,25 @@ cat("Calculating truck attractions coefficients\n")
 load("./data/io/use_table.Rdata")
 
 CountyDemand <- inner_join(CBP, usetable, by = "naics") %>%
+  
   # employment in industry-commodity pair
   mutate(emp = emp * usecoef) %>%
+  
   # employment using commodity, summed across industries within county
-  group_by(GEOID, sctg) %>% summarise(emp = sum(emp)) %>% ungroup(.)  %>%
-  # join county-FAF crosswalk
+  group_by(GEOID, sctg) %>% 
+  summarise(emp = sum(emp)) %>% ungroup(.)  %>%
+  
+  # which FAF zone is the county in?
   left_join(., cnty2faf, by = "GEOID") %>% 
   mutate(F3Z = as.character(F3Z)) %>%
   group_by(F3Z, sctg) %>% 
-  mutate(prob = emp/sum(emp), name = GEOID, mode = 0) %>% ungroup(.) %>%
-  select(lat, long, sctg, name, prob, mode, F3Z) %>%
+  
+  mutate(
+    prob = emp/sum(emp), 
+    name = GEOID, 
+    mode = 0) %>% ungroup(.) %>%
+  
+  select(sctg, name, prob, mode, F3Z) %>%
   tbl_df()
 
 # Imports and Exports ----------------------------------------------------------
@@ -106,59 +128,85 @@ cat("Determining import and export nodes\n")
 # determine which FAF zone they are located in.
 FAFzones <- readShapePoly("./data_raw/shapefiles/faf3zone.shp", 
                           proj4string = WGS84)
-FAFzones <- spTransform(FAFzones, LCC)
 
 # Seaports
 seaports <- readShapePoints("./data_raw/shapefiles/ntad/ports_major.shp",
                             proj4string = WGS84)
-seaports <- spTransform(seaports, LCC)
-seaports$F3Z <- over(seaports, FAFzones)$F3Z
+
 seaports <- seaports@data %>% 
-  mutate(name = PORT, mode = 2,
-         long = seaports@coords[,1], lat = seaports@coords[,2],
-         freight = EXPORTS + IMPORTS)  %>%
-  group_by(F3Z) %>% mutate(prob = freight/sum(freight)) %>% ungroup(.) %>%
-  filter(prob > 0) %>% select(lat, long, name, prob, mode, F3Z) 
+  mutate(
+    name = PORT, 
+    mode = 2,
+    freight = EXPORTS + IMPORTS,
+    F3Z = over(seaports, FAFzones)$F3Z
+  )  %>%
+  
+  # FAF zone probability
+  group_by(F3Z) %>% 
+  mutate(prob = freight/sum(freight)) %>% 
+  ungroup(.) %>%
+  
+  # don't bother keeping stuff we don't need
+  filter(prob > 0) %>%  # empty ports
+  select(name, prob, mode, F3Z) 
 
 # Airports
 airports <- readShapePoints("./data_raw/shapefiles/ntad/airports.shp",
                             proj4string = WGS84)
-airports <- spTransform(airports, LCC)
-airports$F3Z <- over(airports, FAFzones)$F3Z
+
+# air freight statistics
 airfreight <- read.csv("./data_raw/shapefiles/ntad/2006-2010AirFreight.txt", 
                        sep = "#",  stringsAsFactors = FALSE) %>%
   mutate(Year = substr(Date, 0, 4), name = substr(Origin, 0,3)) %>%
   filter(Year == "2007") %>%  group_by(name) %>% 
   summarise(freight = sum(Total))
+
+
 airports <- airports@data %>%
-  mutate(name = LOCID, mode = 3,
-         long = coordinates(airports)[,1], lat = coordinates(airports)[,2]) %>%
-  select(long, lat, name, F3Z, mode) %>% inner_join(., airfreight, by = "name")  %>%
-  group_by(F3Z) %>%  mutate(prob = freight/sum(freight)) %>% ungroup(.) %>%
-  select(lat, long, name, prob, mode, F3Z)
+  mutate(
+    name = LOCID, 
+    mode = 3, 
+    F3Z = over(airports, FAFzones)$F3Z
+  ) %>%
+  select(name, F3Z, mode) %>% 
+  
+  # calculate probability of airport by FAF zone
+  inner_join(., airfreight, by = "name")  %>%
+  group_by(F3Z) %>%  
+  mutate(prob = freight/sum(freight)) %>% ungroup(.) %>%
+  
+  # keep only what we need
+  select(name, prob, mode, F3Z)
 
 
 # Border crossings
 crossings <- readShapePoints("./data_raw/shapefiles/ntad/border_x.shp",
                              proj4string = WGS84)
-crossings <- spTransform(crossings, LCC)
-crossings$F3Z <- over(crossings, FAFzones)$F3Z
+
 crossings <- crossings@data %>% 
-  mutate(long = coordinates(crossings)[,1], lat = coordinates(crossings)[,2], 
-         name = PortCode, mode = 1)  %>%
-  filter(Trucks > 0) %>% group_by(F3Z) %>%
+  mutate(
+    name = PortCode, mode = 1,
+    F3Z = over(crossings, FAFzones)$F3Z
+    )  %>%
+  filter(Trucks > 0) %>% 
+  
+  group_by(F3Z) %>%
   mutate(prob = Trucks / sum(Trucks)) %>% ungroup(.) %>%
-  select(lat, long, name, prob, mode, F3Z)
+  select(name, prob, mode, F3Z)
 
 # Bind the three crossing types into a single lookup table. We haven't considered
 # sctg codes to this point, but we need to retain them in the join. This means
 # we need to expand across all sctg codes.
-suppressWarnings(ienodes <- rbind_list(seaports, airports, crossings) %>%
-  left_join(., expand.grid(mode = c(1:3), 
-                           sctg = sprintf("%02d", c(1:41, 43, 99))), by = "mode") %>%
-  mutate(F3Z = as.character(F3Z), sctg = as.character(sctg)) %>%
-  .[, c("mode", "lat", "long", "name", "prob", "F3Z", "sctg")]
-  )
+ienodes <- rbind_list(seaports, airports, crossings) %>%
+  left_join(
+    ., 
+    expand.grid(mode = c(1:3), sctg = sprintf("%02d", c(1:41, 43, 99))), 
+    by = "mode") %>%
+  mutate(
+    F3Z = as.character(F3Z), 
+    sctg = as.character(sctg)
+  ) %>%
+  select(mode, name, prob, F3Z, sctg)
 
 # Split FAF into production counties -------------------------------------------
 cat("Allocating trucks to origins\n")
@@ -168,24 +216,32 @@ cat("Allocating trucks to origins\n")
 # mode information into a single variable
 load("./data/faf_trucks.Rdata")
 FAF <- FAF %>% ungroup() %>%
-  mutate(id = 1:nrow(FAF),
-         inmode = ifelse(is.na(fr_inmode), 0, fr_inmode),
-         outmode= ifelse(is.na(fr_outmode), 0, fr_outmode)) %>% 
+  mutate(
+    # a new id
+    id = 1:nrow(FAF), 
+    # What import/export mode; if NA then set to 0
+    inmode  = ifelse(is.na(fr_inmode), 0, fr_inmode), 
+    outmode = ifelse(is.na(fr_outmode), 0, fr_outmode)
+  ) %>% 
   select(-fr_inmode, -fr_outmode)
 
 # join the origin node information together and to the FAF data
 originnodes <- rbind_list(ienodes, CountyLabor)
-names(originnodes) <- c("inmode", "olat", "olong", "origin", "prob", 
-                        "dms_orig", "sctg")
-FAF <- inner_join(FAF, originnodes, by = c("dms_orig", "sctg", "inmode"))
+names(originnodes) <- c("inmode", "origin", "prob", "dms_orig", "sctg")
+
+FAF <- FAF %>%
+  inner_join(originnodes, by = c("dms_orig", "sctg", "inmode"))
 
 # split 
-FAF$trucks <- unlist(mclapply(split(FAF, FAF$sctg),  mc.cores = cores,
-                              function (x) splitorigin(x)),
-                     use.names = FALSE)
+FAF$trucks <- unlist(
+  mclapply(split(FAF, FAF$sctg),  mc.cores = cores, 
+           function (x) splitorigin(x)), 
+  use.names = FALSE
+)
 
 # filter out zeros to limit unnecessary memory use.
-FAF <- FAF %>% filter(trucks > 0)
+FAF <- FAF %>% 
+  filter(trucks > 0) %>% select(-prob, -inmode)
 
 # Split FAF into attraction counties -------------------------------------------
 cat("Allocating trucks to destinations\n")
@@ -194,39 +250,43 @@ cat("Allocating trucks to destinations\n")
 # to split destinations at once. One important step will be to reassign each row
 # a new id.
 destinnodes <- rbind_list(ienodes, CountyDemand)
-names(destinnodes) <- c("outmode", "dlat", "dlong", "destination", "prob", 
+names(destinnodes) <- c("outmode", "destination", "prob",  
                         "dms_dest", "sctg")
 
-FAF <- FAF %>% mutate(id = seq(1:nrow(FAF))) %>%  
-  select(-prob, -inmode) %>%
+FAF <- FAF %>% 
+  # need a new id
+  mutate(id = seq(1:nrow(FAF))) %>%  
   inner_join(., destinnodes, by = c("dms_dest", "sctg", "outmode"))
 
 # split 
-FAF$trucks <- unlist(mclapply(split(FAF, FAF$sctg),   mc.cores = cores, 
-                                function (x) splitdest(x)), 
-                       use.names = FALSE)
+FAF$trucks <- unlist(
+  mclapply(split(FAF, FAF$sctg),   mc.cores = cores,  
+           function (x) splitdest(x)), 
+  use.names = FALSE
+)
+
 FAF <- FAF %>% filter(trucks > 0) %>% select(-outmode, -prob)
 
 # Dealing with Alaska ---------------------------------------------------------
 # We are only interested (at this point) in trucks that travel within the 48 
 # contiguous United States. So trucks that travel between Alaska and the lower
-# 48 need to have their origin or destination reassigned to the point where I-15
-# crosses from Montana into Canada (this is the only border crossing that can
-# be used by trucks in the FAF network). 
-Sweetgrass <- crossings %>% filter(name == 3310)
+# 48 need to have their origin or destination reassigned to either I-5 in 
+# Washington or I-15 in Montana
+
+# trucks going between Alaska and CA, OR, WA, NV, AZ, ID, UT use I-5
+i5_zones <- as.character(c(
+  61:69, 411:419, 531:539, 321:329, 41:49, 160, 491:499
+))
 
 FAF <- FAF %>%
-  # filter out trucks exclusively in Hawaii or Alaska (as I think about it, 
-  # this would be more efficient earlier in the scripts). Alaska is zone 20, and
-  # Hawaii is in two zones, 151 and 159.
-  filter(!(dms_orig == "20" & dms_dest == "20")) %>% 
-  filter(!(dms_orig %in% c("151", "159") & dms_dest %in% c("151", "159"))) %>% 
-  # If one end of the trip is in Alaska, reassign that end to I-15 in Montana
-  mutate(olat  = ifelse(dms_orig == "20", Sweetgrass$lat,  olat ),
-         olong = ifelse(dms_orig == "20", Sweetgrass$long, olong),
-         dlat  = ifelse(dms_dest == "20", Sweetgrass$lat,  dlat ),
-         dlong = ifelse(dms_dest == "20", Sweetgrass$long, dlong))
-
+  mutate_if(
+    dms_orig == "20", 
+    origin = ifelse(dms_dest %in% i5_zones, "3004", "3310")
+  ) %>%
+  mutate_if(
+    dms_dest == "20", 
+    destination = ifelse(dms_orig %in% i5_zones, "3004", "3310")
+  )
 
 
 cat("Writing to file\n")

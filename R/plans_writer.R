@@ -25,13 +25,13 @@ if(cores > detectCores()){stop("Requested processes exceeds available cores.") }
 getDepartureDay <- function(df){
   splittable <- df %>% ungroup() %>%
     group_by(id)  %>%
-    do( data.frame(olat = rep(.$olat, .$trucks), olong = rep(.$olong, .$trucks),
-                   dlat = rep(.$dlat, .$trucks), dlong = rep(.$dlong, .$trucks),
-                   sctg = rep(.$sctg, .$trucks), type = rep(.$type, .$trucks), 
-                   origin = rep(.$origin, .$trucks), 
-                   destination = rep(.$destination, .$trucks),
-                   day = sample(0:364, .$trucks, replace = TRUE))) %>%
-    filter(day <= 3)
+    do( data.frame( 
+      sctg = rep(.$sctg, .$trucks), type = rep(.$type, .$trucks),  
+      origin = rep(.$origin, .$trucks),  
+      destination = rep(.$destination, .$trucks), 
+      day = sample(0:364, .$trucks, replace = TRUE)
+    )) %>%
+    filter(day <= 10)
   return(splittable)
 }
 
@@ -81,13 +81,19 @@ FAF <- FAF %>% mutate(id = seq(1:nrow(FAF))) %>%
 # crossing the country. We'll need to come back to this when we build the whole
 # thing.
 
-FAF <- rbind_all(mclapply(split(FAF, FAF$sctg), mc.cores = cores,
-                                           function(x) getDepartureDay(x)))
+FAF <- rbind_all(mclapply(
+  split(FAF, FAF$sctg), mc.cores = cores, 
+  function(x) getDepartureDay(x))
+)
+
 FAF <- FAF %>%
-  mutate(departure = round((getDepartureTime(nrow(FAF), 0.5, 9, 16, 2.5, 2.5) + 
-                           24 * FAF$day) * 3600, 0),
-         id = seq(1:nrow(FAF))) %>%
-  sample_frac(0.03) # sample 3% of the records
+  mutate(
+    departure = round(
+      (getDepartureTime(nrow(FAF), 0.5, 9, 16, 2.5, 2.5) +  
+         24 * FAF$day) * 3600,
+      0), 
+    id = seq(1:nrow(FAF))
+  )
 
 save(FAF, file = "./data/truck_plans.Rdata")
 cat("Writing to XML\n")

@@ -14,7 +14,6 @@ USE_TABLE = pd.read_csv(
     dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
 )
 
-
 def pick_county(zone, sctg, df):
     """
     :param zone: the original FAF Zone O or D for the truck
@@ -28,12 +27,14 @@ def pick_county(zone, sctg, df):
     county = np.random.choice(df['name'], p=df['prob'])
     return county
 
+
 def get_start_day():
     """
     :return: a random day of the week. For now all days are the same,
     but we don't have to make it that way. We have a two-week simulation
     """
     return np.random.randint(1, 14)
+
 
 def get_departure_time():
     """

@@ -45,12 +45,8 @@ cat("Calculating truck productions coefficients\n")
 
 load("./data/cbp_data.Rdata")
 load("./data/io/make_table.Rdata")
-WGS84 <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 
-cnty2faf <- readShapePoints("./data_raw/shapefiles/cnty2faf.shp",
-                            proj4string = WGS84)
-
-cnty2faf <- cnty2faf@data %>%
+cnty2faf <- read.dbf("./data_raw/shapefiles/cnty2faf.dbf") %>%
   select(GEOID, F3Z)
   
 # Lookup table with the probability of a county within a FAF zone producing
@@ -82,7 +78,7 @@ CountyLabor <- inner_join(CBP, maketable, by = "naics") %>%
   # cleanup
   select(sctg, name, prob, mode, F3Z) %>%
   tbl_df()
-
+write.csv(CountyLabor, "./data/make_table.csv")
 
 
 
@@ -115,6 +111,8 @@ CountyDemand <- inner_join(CBP, usetable, by = "naics") %>%
   
   select(sctg, name, prob, mode, F3Z) %>%
   tbl_df()
+
+write.csv(CountyDemand, "./data/use_table.csv")
 
 # Imports and Exports ----------------------------------------------------------
 cat("Determining import and export nodes\n")

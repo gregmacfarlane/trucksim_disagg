@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import lxml.etree as et
 import gzip
+import itertools
 
 
 # Read in the lookup tables for the origins and the destinations.
@@ -59,11 +60,10 @@ def get_departure_time():
 
 class TruckPlan:
     """Critical information for the truck plan"""
-    truckCount = 0
+    id_iter = itertools.count(1)
 
-    def __init__(self, truck_id, origin, destination, sctg):
-        TruckPlan.truckCount += 1
-        self.id = truck_id
+    def __init__(self, origin, destination, sctg):
+        self.id = self.id_iter.next()
         self.origin = origin
         self.destination = destination
         self.sctg = sctg

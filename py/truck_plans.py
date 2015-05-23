@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import xml.etree.ElementTree as et
+import lxml.etree as et
 
 
 # Read in the lookup tables for the origins and the destinations.
@@ -13,6 +13,7 @@ USE_TABLE = pd.read_csv(
     "./data/use_table.csv",
     dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
 )
+
 
 def pick_county(zone, sctg, df):
     """
@@ -59,12 +60,13 @@ class TruckPlan:
     """Critical information for the truck plan"""
     truckCount = 0
 
-    def __init__(self, id, origin, destination, sctg):
+    def __init__(self, truck_id, origin, destination, sctg):
         TruckPlan.truckCount += 1
-        self.id = id
+        self.id = truck_id
         self.origin = origin
         self.destination = destination
         self.sctg = sctg
+        self.time = None
 
         # get the departure time
         self.get_time()
@@ -72,6 +74,8 @@ class TruckPlan:
         # get the origin and destination counties
         self.get_origin()
         self.get_destination()
+
+        self.write_plan()
 
     def display_plan(self):
         print "Origin: ", self.origin, "Destination", self.destination
@@ -83,13 +87,30 @@ class TruckPlan:
         self.destination = pick_county(self.destination, self.sctg, USE_TABLE)
 
     def get_time(self):
-        "What time does the truck leave?"
         self.time = get_start_day() * 3600 + get_departure_time()
 
+    def write_plan(self):
+        person = et.SubElement(population, "person",
+                               attrib={'id': str(self.id)})
+        plan = et.SubElement(person, "plan", attrib={'selected': "yes"})
+        act = et.SubElement(plan, "act",
+                            attrib={'type': "dummy",
+                                    'facility': str(self.origin),
+                                    'end_time': str(self.time)
+                                    })
+        leg = et.SubElement(plan, "leg", attrib={'mode': "car"})
+        act = et.SubElement(plan, "act",
+                            attrib={'type': "dummy",
+                                    'facility': str(self.destination)})
+
+
+population = et.Element("population")
+pop_file = et.ElementTree(population)
 
 t1 = TruckPlan(1, "19", "371", "01")
 
-print "Truck plans created: ", TruckPlan.truckCount
-
-
-
+with open('population.xml', 'w') as f:
+    f.write("""<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v5.dtd">
+""")
+    pop_file.write(f, pretty_print=True)

@@ -10,27 +10,28 @@ def recur_dictify(frame):
     h/t: http://stackoverflow.com/a/19900276/843419
     :param frame: a pandas data frame
     :return: a nested dictionary with the columns as the keys and the final one
-    as the value. Best if the keys are arranged and sorted and there are no duplicates.
+    as the value. Best if the keys are arranged and sorted and there are no
+    duplicates.
     """
     if len(frame.columns) == 1:
-        if frame.values.size == 1: return frame.values[0][0]
+        if frame.values.size == 1:
+            return frame.values[0][0]
         return frame.values.squeeze()
     grouped = frame.groupby(frame.columns[0])
-    d = {k: recur_dictify(g.ix[:,1:]) for k,g in grouped}
+    d = {k: recur_dictify(g.ix[:, 1:]) for k, g in grouped}
     return d
 
 
-
-def pick_county(dict, sctg, zone):
+def pick_county(dict_table, sctg, zone):
     """
     :param sctg: the commodity code for the truck's cargo
-    :param dict: the appropriate lookup table
+    :param dict_table: the appropriate lookup table
     :return: the O or D county FIPS code
     """
     # get the relevant county lookup table
     county = np.random.choice(
-        dict[zone][sctg].keys(),
-        p=dict[zone][sctg].values())
+        dict_table[zone][sctg].keys(),
+        p=dict_table[zone][sctg].values())
     return county
 
 
@@ -46,10 +47,9 @@ def get_departure_time():
     """
     :return: a random time in the day, bimodally distributed.
     """
-    y0 = np.random.normal(9, 2.5)
-    y1 = np.random.normal(16, 2.5)
     flag = np.random.binomial(1, 0.5)
-    y = y0 * (1 - flag) + y1 * flag
+    y = np.random.normal(9, 2.5) * (1 - flag) + \
+        np.random.normal(16, 2.5) * flag
     if y < 0:
         # time cannot be less than midnight
         y = np.random.randint(0, 6 * 3600)
@@ -67,8 +67,7 @@ class TruckPlan:
 
     def __init__(self, origin, destination, sctg):
         """
-
-        :rtype : a truck plan
+        :rtype : a truck plan with origin, destination, etc.
         """
         self.id = self.id_iter.next()
         self.origin = origin
@@ -136,7 +135,6 @@ faf_trucks = faf_trucks.head(5)
 for index, row in faf_trucks.iterrows():
     [TruckPlan(row['dms_orig'], row['dms_dest'], row['sctg'])
      for _ in range(row['trucks'])]
-
 
 with gzip.open('population.xml.gz', 'w', compresslevel=0) as f:
     f.write("""<?xml version="1.0" encoding="utf-8"?>

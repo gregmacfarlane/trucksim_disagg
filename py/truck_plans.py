@@ -5,29 +5,32 @@ import gzip
 import itertools
 
 
-# Read in the lookup tables for the origins and the destinations.
-MAKE_TABLE = pd.read_csv(
-    "./data/make_table.csv",
-    dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
-)
-
-USE_TABLE = pd.read_csv(
-    "./data/use_table.csv",
-    dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
-)
-
-
-def pick_county(zone, sctg, df):
+def recur_dictify(frame):
     """
-    :param zone: the original FAF Zone O or D for the truck
+    h/t: http://stackoverflow.com/a/19900276/843419
+    :param frame: a pandas data frame
+    :return: a nested dictionary with the columns as the keys and the final one
+    as the value. Best if the keys are arranged and sorted and there are no duplicates.
+    """
+    if len(frame.columns) == 1:
+        if frame.values.size == 1: return frame.values[0][0]
+        return frame.values.squeeze()
+    grouped = frame.groupby(frame.columns[0])
+    d = {k: recur_dictify(g.ix[:,1:]) for k,g in grouped}
+    return d
+
+
+
+def pick_county(dict, sctg, zone):
+    """
     :param sctg: the commodity code for the truck's cargo
-    :param df: the appropriate lookup table
+    :param dict: the appropriate lookup table
     :return: the O or D county FIPS code
     """
     # get the relevant county lookup table
-    df = df[df['F3Z'] == zone]
-    df = df[df['sctg'] == sctg]
-    county = np.random.choice(df['name'], p=df['prob'])
+    county = np.random.choice(
+        dict[zone][sctg].keys(),
+        p=dict[zone][sctg].values())
     return county
 
 
@@ -63,6 +66,10 @@ class TruckPlan:
     id_iter = itertools.count(1)
 
     def __init__(self, origin, destination, sctg):
+        """
+
+        :rtype : a truck plan
+        """
         self.id = self.id_iter.next()
         self.origin = origin
         self.destination = destination
@@ -82,10 +89,10 @@ class TruckPlan:
         print "Origin: ", self.origin, "Destination", self.destination
 
     def get_origin(self):
-        self.origin = pick_county(self.origin, self.sctg, MAKE_TABLE)
+        self.origin = pick_county(MAKE_DICT, self.sctg, self.origin)
 
     def get_destination(self):
-        self.destination = pick_county(self.destination, self.sctg, USE_TABLE)
+        self.destination = pick_county(USE_DICT, self.sctg, self.destination)
 
     def get_time(self):
         self.time = get_start_day() * 3600 + get_departure_time()
@@ -104,10 +111,26 @@ class TruckPlan:
                                            'facility': str(self.destination)})
 
 
+# Read in the I/O tables and convert them to dictionaries.
+MAKE_DICT = recur_dictify(pd.read_csv(
+    "./data/make_table.csv",
+    dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
+))
+
+USE_DICT = recur_dictify(pd.read_csv(
+    "./data/use_table.csv",
+    dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
+))
+
+# Create the element tree container
 population = et.Element("population")
 pop_file = et.ElementTree(population)
 
-t1 = TruckPlan(1, "19", "371", "01")
+# read in the split trucks file with numbers of trucks going from i to j.
+
+# create the appropriate trucks for each row.
+[TruckPlan('100', '373', '01') for _ in range(10000)]
+
 
 with gzip.open('population.xml.gz', 'w', compresslevel=0) as f:
     f.write("""<?xml version="1.0" encoding="utf-8"?>

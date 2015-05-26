@@ -191,29 +191,3 @@ ienodes <- rbind_list(seaports, airports, crossings) %>%
   arrange(F3Z, mode, sctg)
 
 write.csv(ienodes, "./data/ienodes.csv", row.names = FALSE)
-
-# Dealing with Alaska ---------------------------------------------------------
-# We are only interested (at this point) in trucks that travel within the 48 
-# contiguous United States. So trucks that travel between Alaska and the lower
-# 48 need to have their origin or destination reassigned to either I-5 in 
-# Washington or I-15 in Montana
-
-# trucks going between Alaska and CA, OR, WA, NV, AZ, ID, UT use I-5
-i5_zones <- as.character(c(
-  61:69, 411:419, 531:539, 321:329, 41:49, 160, 491:499
-))
-
-FAF <- FAF %>%
-  mutate_if(
-    dms_orig == "20", 
-    origin = ifelse(dms_dest %in% i5_zones, "3004", "3310")
-  ) %>%
-  mutate_if(
-    dms_dest == "20", 
-    destination = ifelse(dms_orig %in% i5_zones, "3004", "3310")
-  )
-
-
-cat("Writing to file\n")
-save(FAF, file = "./data/disaggregated_trucks.Rdata")
-

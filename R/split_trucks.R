@@ -13,28 +13,8 @@ suppressPackageStartupMessages(require(rgdal))
 suppressPackageStartupMessages(require(parallel))
 
 # The user should enter the number of cores with the call.
-args <-commandArgs(TRUE)
-cores <- args[1]
-if(is.na(cores)){stop("please submit the number of processes to use:
-rscript Flows2Trucks.R 4")}
-if(cores > detectCores()){stop("Requested processes exceeds available cores.") }
 
-# FUNCTION TO SPLIT TRUCKS BASED ON PROBABILITY --------------------------------
-splitorigin <- function(df){
-  splittable <- df %>% ungroup() %>%
-    group_by(id)  %>%
-    do(data.frame(table(sample(factor(.$origin), .$trucks[1], .$prob, 
-                               replace = TRUE))))
-  return(splittable$Freq)
-}
 
-splitdest <- function(df){
-  splittable <- df %>% ungroup() %>%
-    group_by(id)  %>%
-    do(data.frame(table(sample(factor(.$destination), .$trucks[1], .$prob, 
-                               replace = TRUE))))
-  return(splittable$Freq)
-}
 # Truck Productions ------------------------------------------------------------
 cat("Calculating truck productions coefficients\n")
 # In this section we determine the origin locations of our trucks based on 
@@ -71,14 +51,14 @@ CountyLabor <- inner_join(CBP, maketable, by = "naics") %>%
   mutate(
     prob = emp/sum(emp), 
     # origin name
-    name = GEOID, 
-    # travel mode
-    mode = 0) %>% ungroup() %>%
+    name = GEOID
+  ) %>% ungroup() %>%
   
   # cleanup
-  select(sctg, name, prob, mode, F3Z) %>%
-  tbl_df()
-write.csv(CountyLabor, "./data/make_table.csv")
+  select(F3Z, sctg, name, prob) %>%
+  arrange(F3Z, sctg) %>% tbl_df()
+
+write.csv(CountyLabor, "./data/make_table.csv", row.names = FALSE)
 
 
 
@@ -106,13 +86,14 @@ CountyDemand <- inner_join(CBP, usetable, by = "naics") %>%
   
   mutate(
     prob = emp/sum(emp), 
-    name = GEOID, 
-    mode = 0) %>% ungroup(.) %>%
+    name = GEOID
+  ) %>% ungroup(.) %>%
   
-  select(sctg, name, prob, mode, F3Z) %>%
-  tbl_df()
+  # cleanup
+  select(F3Z, sctg, name, prob) %>%
+  arrange(F3Z, sctg) %>% tbl_df()
 
-write.csv(CountyDemand, "./data/use_table.csv")
+write.csv(CountyDemand, "./data/use_table.csv", row.names = FALSE)
 
 # Imports and Exports ----------------------------------------------------------
 cat("Determining import and export nodes\n")
@@ -124,6 +105,8 @@ cat("Determining import and export nodes\n")
 
 # First, we load the shapefiles for ports, airports, and border crossings and
 # determine which FAF zone they are located in.
+WGS84 <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
+
 FAFzones <- readShapePoly("./data_raw/shapefiles/faf3zone.shp", 
                           proj4string = WGS84)
 
@@ -204,66 +187,10 @@ ienodes <- rbind_list(seaports, airports, crossings) %>%
     F3Z = as.character(F3Z), 
     sctg = as.character(sctg)
   ) %>%
-  select(mode, name, prob, F3Z, sctg)
+  select(F3Z, mode, sctg, name, prob) %>%
+  arrange(F3Z, mode, sctg)
 
-# Split FAF into production counties -------------------------------------------
-cat("Allocating trucks to origins\n")
-# Based on the point probability we calculated above, distribute the trucks to
-# each point. To limit the amount of data splitting and recombining, we want 
-# to split origins at once; this requires that we consolidate import and domestic
-# mode information into a single variable
-load("./data/faf_trucks.Rdata")
-FAF <- FAF %>% ungroup() %>%
-  mutate(
-    # a new id
-    id = 1:nrow(FAF), 
-    # What import/export mode; if NA then set to 0
-    inmode  = ifelse(is.na(fr_inmode), 0, fr_inmode), 
-    outmode = ifelse(is.na(fr_outmode), 0, fr_outmode)
-  ) %>% 
-  select(-fr_inmode, -fr_outmode)
-
-# join the origin node information together and to the FAF data
-originnodes <- rbind_list(ienodes, CountyLabor)
-names(originnodes) <- c("inmode", "origin", "prob", "dms_orig", "sctg")
-
-FAF <- FAF %>%
-  inner_join(originnodes, by = c("dms_orig", "sctg", "inmode"))
-
-# split 
-FAF$trucks <- unlist(
-  mclapply(split(FAF, FAF$sctg),  mc.cores = cores, 
-           function (x) splitorigin(x)), 
-  use.names = FALSE
-)
-
-# filter out zeros to limit unnecessary memory use.
-FAF <- FAF %>% 
-  filter(trucks > 0) %>% select(-prob, -inmode)
-
-# Split FAF into attraction counties -------------------------------------------
-cat("Allocating trucks to destinations\n")
-# Based on the point probability we calculated above, distribute the trucks to
-# each point. To limit the amount of data splitting and recombining, we want 
-# to split destinations at once. One important step will be to reassign each row
-# a new id.
-destinnodes <- rbind_list(ienodes, CountyDemand)
-names(destinnodes) <- c("outmode", "destination", "prob",  
-                        "dms_dest", "sctg")
-
-FAF <- FAF %>% 
-  # need a new id
-  mutate(id = seq(1:nrow(FAF))) %>%  
-  inner_join(., destinnodes, by = c("dms_dest", "sctg", "outmode"))
-
-# split 
-FAF$trucks <- unlist(
-  mclapply(split(FAF, FAF$sctg),   mc.cores = cores,  
-           function (x) splitdest(x)), 
-  use.names = FALSE
-)
-
-FAF <- FAF %>% filter(trucks > 0) %>% select(-outmode, -prob)
+write.csv(ienodes, "./data/ienodes.csv", row.names = FALSE)
 
 # Dealing with Alaska ---------------------------------------------------------
 # We are only interested (at this point) in trucks that travel within the 48 

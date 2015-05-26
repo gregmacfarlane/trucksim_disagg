@@ -88,10 +88,30 @@ class TruckPlan:
         print "Origin: ", self.origin, "Destination", self.destination
 
     def get_origin(self):
-        self.origin = pick_county(MAKE_DICT, self.sctg, self.origin)
+        # Is the truck coming from Alaska?
+        if self.origin == '20':
+            # Is it going to states on the west coast?
+            if self.destination in west_coast_f3z:
+                # I-5 at the Washington/British Columbia border
+                self.origin = '3004'
+            else:
+                # I-15 at the Montana/Alberta border
+                self.origin = '3310'
+        else:
+            self.origin = pick_county(MAKE_DICT, self.sctg, self.origin)
 
     def get_destination(self):
-        self.destination = pick_county(USE_DICT, self.sctg, self.destination)
+        # Is the truck going to Alaska?
+        if self.destination == '20':
+            # is it coming from states on the west coast?
+            if self.origin[:2] in west_coast_states:
+                # I-5 at the Washington/British Columbia border
+                self.destination == '3004'
+            else:
+                # I-15 at the Montana/Alberta border
+                self.destination == '3310'
+        else:
+            self.destination = pick_county(USE_DICT, self.sctg, self.destination)
 
     def get_time(self):
         self.time = get_start_day() * 3600 + get_departure_time()
@@ -120,6 +140,14 @@ USE_DICT = recur_dictify(pd.read_csv(
     "./data/use_table.csv",
     dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
 ))
+
+# To handle Alaska shipments appropriately, we need to have a list of
+# states/faf zones where the trucks will either drive down the coast to
+# Washington or in front of the Rockies to Montana
+# western states (Washington route): [CA, OR, WA, NV, AZ, ID, UT]
+west_coast_states = ['06', '41', '53', '32', '04', '16', '49']
+west_coast_f3z = range(61, 69) + range(411, 419) + range(531, 539) + \
+                 range(321, 329) + range(41, 49) + [160] + range(491, 499)
 
 # Create the element tree container
 population = et.Element("population")

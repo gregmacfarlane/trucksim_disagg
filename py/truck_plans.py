@@ -94,15 +94,14 @@ class TruckPlan:
         person = et.SubElement(population, "person",
                                attrib={'id': str(self.id)})
         plan = et.SubElement(person, "plan", attrib={'selected': "yes"})
-        act = et.SubElement(plan, "act",
-                            attrib={'type': "dummy",
-                                    'facility': str(self.origin),
-                                    'end_time': str(self.time)
-                                    })
-        leg = et.SubElement(plan, "leg", attrib={'mode': "car"})
-        act = et.SubElement(plan, "act",
-                            attrib={'type': "dummy",
-                                    'facility': str(self.destination)})
+
+        # write elements of plan
+        et.SubElement(plan, "act", attrib={'type': "dummy",
+                                           'facility': str(self.origin),
+                                           'end_time': str(self.time)})
+        et.SubElement(plan, "leg", attrib={'mode': "car"})
+        et.SubElement(plan, "act", attrib={'type': "dummy",
+                                           'facility': str(self.destination)})
 
 
 population = et.Element("population")

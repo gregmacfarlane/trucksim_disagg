@@ -11,3 +11,10 @@ faf_trucks.Rdata
 disaggregated_trucks.Rdata
 truck_plans.Rdata
 .idea
+data/faf_trucks.csv
+data/make_table.csv
+data/use_table.csv
+.population.xml.gz.swp
+population.xml
+population.xml.gz
+ienodes.csv

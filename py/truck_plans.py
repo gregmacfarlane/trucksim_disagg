@@ -127,9 +127,15 @@ population = et.Element("population")
 pop_file = et.ElementTree(population)
 
 # read in the split trucks file with numbers of trucks going from i to j.
+faf_trucks = pd.read_csv("./data/faf_trucks.csv",
+                         dtype={'dms_orig': np.str, 'dms_dest': np.str,
+                                'sctg': np.str, 'trucks': np.int})
+faf_trucks = faf_trucks.head(5)
 
-# create the appropriate trucks for each row.
-[TruckPlan('100', '373', '01') for _ in range(10000)]
+# create the appropriate numbers of trucks for each row.
+for index, row in faf_trucks.iterrows():
+    [TruckPlan(row['dms_orig'], row['dms_dest'], row['sctg'])
+     for _ in range(row['trucks'])]
 
 
 with gzip.open('population.xml.gz', 'w', compresslevel=0) as f:

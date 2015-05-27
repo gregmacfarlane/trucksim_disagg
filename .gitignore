@@ -18,3 +18,4 @@ data/use_table.csv
 population.xml
 population.xml.gz
 ienodes.csv
+*.prof

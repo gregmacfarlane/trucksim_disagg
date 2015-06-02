@@ -3,16 +3,13 @@
 # This script assigns the trucks flowing between two FAF regions to counties
 # based on county business patterns and macroeconomic IO tables.
 library(methods)
-suppressPackageStartupMessages(require(dplyr))
-suppressPackageStartupMessages(require(dplyrExtras))
-suppressPackageStartupMessages(require(foreign))
-suppressPackageStartupMessages(require(reshape2))
-suppressPackageStartupMessages(require(maptools))
-suppressPackageStartupMessages(require(sp))
-suppressPackageStartupMessages(require(rgdal))
-suppressPackageStartupMessages(require(parallel))
-
-# The user should enter the number of cores with the call.
+require(dplyr)
+require(dplyrExtras)
+require(foreign)
+require(reshape2)
+require(maptools)
+require(sp)
+require(rgdal)
 
 
 # Truck Productions ------------------------------------------------------------

@@ -19,3 +19,4 @@ population.xml
 population.xml.gz
 ienodes.csv
 *.prof
+*.swp

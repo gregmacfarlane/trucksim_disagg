@@ -5,8 +5,8 @@
 # FAF Data -----
 # This script creates an R binary file from the FAF source data 
 # in the year specified by the user. Requires the `dplyr` package.
-suppressPackageStartupMessages(library(dplyr))
-suppressPackageStartupMessages(library(reshape2))
+library(dplyr, warn.conflicts = FALSE)
+library(reshape2)
 
 # The user should enter the year with the call; the year must be a valid year
 # either observed of forecasted values.

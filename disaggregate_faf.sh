@@ -21,7 +21,7 @@ echo "--------------------------------------"
 # @param small boolean indicating if the faf should only disaggregate trucks
 # bound for Raleigh, NC (for debugging with minimal sample)
 
-Rscript R/data_prep.R 2011 TRUE
+#Rscript R/data_prep.R 2011 TRUE
 
 # 2 ---------------------------
 echo 

@@ -23,7 +23,7 @@ if(cores > detectCores()){stop("Requested processes exceeds available cores.") }
 # Read the truck allocation factors (Table 3-3) into memory, and reshape to make
 # it more useful. Also account for R's extremely annoying habit of converting 
 # everything it can into a factor
-truck_allocation_factors <- read.csv("../data_raw/trucks/truckallocation.csv") %>%
+truck_allocation_factors <- read.csv("data_raw/trucks/truckallocation.csv") %>%
   melt( ., id.vars = "distance",
        variable.name = 'vehicle_type', value.name = "allocation_factor") %>%
   mutate(vehicle_type = as.character(vehicle_type))
@@ -34,7 +34,7 @@ truck_allocation_factors <- read.csv("../data_raw/trucks/truckallocation.csv") %
 # we are dealing with tons we need to scale the factors to account for the
 # differences. *UPDATE* You seem to want to convert the units on the tons and values
 # instead.
-truck_equivalency_factors <- read.csv("../data_raw/trucks/truckequivalence.csv") %>%
+truck_equivalency_factors <- read.csv("data_raw/trucks/truckequivalence.csv") %>%
   melt( ., id.vars = c("vehicle_type", "sctg"), 
        variable.name = 'body_type', value.name = 'equiv_factor') %>%
   mutate(vehicle_type = as.character(vehicle_type),
@@ -44,7 +44,7 @@ truck_equivalency_factors <- read.csv("../data_raw/trucks/truckequivalence.csv")
 # Finally, read empty truck factors from Table 3-5 and define a helper function
 # to grab the appropriate ones by body type and flow direction. Again, convert
 # from the original wide to tall format on the fly.
-empty_truck_factors <- read.csv("../data_raw/trucks/emptytrucks.csv") %>%
+empty_truck_factors <- read.csv("data_raw/trucks/emptytrucks.csv") %>%
   melt(., id.vars = c("crossing_type", "body_type"),
        variable.name = "vehicle_type", value.name = "empty_factor") %>%
   mutate(vehicle_type = as.character(vehicle_type),
@@ -145,7 +145,7 @@ simpleTruckloadEquivalencies <- function(flow_records, truck_factors){
 # sets of information from the FAF zones shapefile.
 cat("Calculating distance and adjacency\n")
 WGS84 <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
-FAFzones <- readShapePoly("../data_raw/shapefiles/faf3zone.shp", proj4string = WGS84)
+FAFzones <- readShapePoly("data_raw/shapefiles/faf3zone.shp", proj4string = WGS84)
 FAFzones@data <- FAFzones@data %>% select(F3Z)
 
 # Calculate Great Circle distance between every zone, and reshape into a lookup
@@ -172,7 +172,7 @@ neighbors <- melt(neighbors, value.name = "adjacent") %>%
 
 # APPLY FACTORS TO FAF DATA ===================================================
 cat("Calculating trucks\n")
-load("../data/faf_data.Rdata")
+load("data/faf_data.Rdata")
 
 FAF <- left_join(FAF, distmatrix, by = c("dms_dest", "dms_orig")) %>%
   left_join(., neighbors, by = c("dms_dest", "dms_orig")) %>%
@@ -186,5 +186,5 @@ FAF <- rbind_all(mclapply(split(FAF, FAF$sctg), mc.cores = cores,
   mutate(trucks = ceiling(trucks))
 
 
-save(FAF, file = "../data/faf_trucks.Rdata")
+save(FAF, file = "data/faf_trucks.Rdata")
 

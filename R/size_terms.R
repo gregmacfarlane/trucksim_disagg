@@ -25,7 +25,8 @@ load("./data/cbp_data.Rdata")
 load("./data/io/make_table.Rdata")
 
 cnty2faf <- read.dbf("./data_raw/shapefiles/cnty2faf.dbf") %>%
-  select(GEOID, F3Z)
+  select(GEOID, F3Z) %>%
+  mutate(F3Z = ifelse(F3Z == "441", "440", F3Z))
   
 # Lookup table with the probability of a county within a FAF zone producing
 # a given commodity determined as the county's share of relevant NAICS 

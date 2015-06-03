@@ -115,7 +115,7 @@ seaports <- readShapePoints("./data_raw/shapefiles/ntad/ports_major.shp",
 seaports <- seaports@data %>% 
   mutate(
     name = PORT, 
-    mode = 2,
+    mode = 3,
     freight = EXPORTS + IMPORTS,
     F3Z = over(seaports, FAFzones)$F3Z
   )  %>%
@@ -144,7 +144,7 @@ airfreight <- read.csv("./data_raw/shapefiles/ntad/2006-2010AirFreight.txt",
 airports <- airports@data %>%
   mutate(
     name = LOCID, 
-    mode = 3, 
+    mode = 4, 
     F3Z = over(airports, FAFzones)$F3Z
   ) %>%
   select(name, F3Z, mode) %>% 
@@ -173,20 +173,11 @@ crossings <- crossings@data %>%
   mutate(prob = Trucks / sum(Trucks)) %>% ungroup(.) %>%
   select(name, prob, mode, F3Z)
 
-# Bind the three crossing types into a single lookup table. We haven't considered
-# sctg codes to this point, but we need to retain them in the join. This means
-# we need to expand across all sctg codes.
+# Bind the three crossing types into a single lookup table. 
 ienodes <- rbind_list(seaports, airports, crossings) %>%
-  left_join(
-    ., 
-    expand.grid(mode = c(1:3), sctg = sprintf("%02d", c(1:41, 43, 99))), 
-    by = "mode") %>%
-  mutate(
-    F3Z = as.character(F3Z), 
-    sctg = as.character(sctg)
-  ) %>%
-  select(F3Z, mode, sctg, name, prob) %>%
-  arrange(F3Z, mode, sctg)
+  mutate(F3Z = as.character(F3Z)) %>%
+  select(F3Z, mode, name, prob) %>%
+  arrange(F3Z, mode)
 
 write.csv(ienodes, "./data/ienodes.csv", row.names = FALSE)
 

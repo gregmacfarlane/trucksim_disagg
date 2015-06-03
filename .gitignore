@@ -22,3 +22,4 @@ ienodes.csv
 *.swp
 tract_employment.csv
 truckplans.pyc
+facility_coords.csv

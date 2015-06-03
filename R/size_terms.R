@@ -183,3 +183,51 @@ ienodes <- rbind_list(seaports, airports, crossings) %>%
 write.csv(ienodes, "./data/ienodes.csv", row.names = FALSE)
 
 
+# Activity Coordinates ------
+LCC <- CRS("+proj=lcc +lat_1=49 +lat_2=45 +lat_0=44.25 +lon_0=-109.5 
+           +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs")
+
+counties <- readShapePoints("data_raw/shapefiles/cnty2faf.shp",
+                            proj4string = WGS84) %>%
+  spTransform(LCC)
+
+counties <- counties@data %>%
+  transmute(
+    name = as.character(GEOID), 
+    x = coordinates(counties)[, 1],
+    y = coordinates(counties)[, 2]
+  )
+
+seaports <- readShapePoints("./data_raw/shapefiles/ntad/ports_major.shp",
+                            proj4string = WGS84) %>%
+  spTransform(LCC)
+seaports <- seaports@data %>%
+  transmute(
+    name = as.character(PORT), 
+    x = coordinates(seaports)[, 1],
+    y = coordinates(seaports)[, 2]
+  )
+  
+
+airports <- readShapePoints("./data_raw/shapefiles/ntad/airports.shp",
+                            proj4string = WGS84) %>%
+  spTransform(LCC)
+airports <- airports@data %>%
+  transmute(
+    name = as.character(LOCID), 
+    x = coordinates(airports)[, 1],
+    y = coordinates(airports)[, 2]
+  )
+
+
+crossings <- readShapePoints("./data_raw/shapefiles/ntad/border_x.shp",
+                             proj4string = WGS84) %>%
+  spTransform(LCC)
+crossings <- crossings@data %>%
+  transmute(
+    name = as.character(PortCode), 
+    x = coordinates(crossings)[, 1],
+    y = coordinates(crossings)[, 2]
+  )
+
+points <- rbind_list(counties, airports, seaports, crossings)

@@ -44,5 +44,5 @@ Rscript R/size_terms.R
 
 # This python script directs the individual trucks to counties or ports based on
 # county-level economic data and economy-wide IO tables.
-python py/disaggregate_trucks.py
+python -m cProfile -o complete_run.prof py/disaggregate_trucks.py
 

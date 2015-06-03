@@ -77,6 +77,9 @@ def get_departure_time():
     return int(y)
 
 
+def get_coord(name, dim):
+    return str(FAC_COORDS[dim][name])
+
 class TruckPlan:
     """Critical information for the truck plan"""
     id_iter = itertools.count(1)
@@ -160,12 +163,16 @@ class TruckPlan:
         plan = et.SubElement(person, "plan", attrib={'selected': "yes"})
 
         # write elements of plan
-        et.SubElement(plan, "act", attrib={'type': "dummy",
-                                           'facility': str(self.origin),
-                                           'end_time': str(self.time)})
+        et.SubElement(plan, "act",
+                      attrib={'type': "dummy",
+                              'x': get_coord(self.origin, 'x'),
+                              'y': get_coord(self.origin, 'x'),
+                              'end_time': str(self.time)})
         et.SubElement(plan, "leg", attrib={'mode': "car"})
-        et.SubElement(plan, "act", attrib={'type': "dummy",
-                                           'facility': str(self.destination)})
+        et.SubElement(plan, "act",
+                      attrib={'type': "dummy",
+                              'x': get_coord(self.destination, 'x'),
+                              'y': get_coord(self.destination, 'y')})
 
 
 if __name__ == "__main__":
@@ -195,6 +202,13 @@ if __name__ == "__main__":
         "./data/ienodes.csv",
         dtype={'F3Z': np.str, 'mode': np.str, 'name': np.str}
     ))
+
+    # Geographical points for the activity locations
+    FAC_COORDS = pd.read_csv(
+        "./data/facility_coords.csv",
+        dtype={'name': np.str}
+    ).set_index('name').to_dict()
+
 
     # Create the element tree container
     population = et.Element("population")

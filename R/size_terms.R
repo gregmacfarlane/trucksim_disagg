@@ -183,27 +183,3 @@ ienodes <- rbind_list(seaports, airports, crossings) %>%
 write.csv(ienodes, "./data/ienodes.csv", row.names = FALSE)
 
 
-# Tract size terms -----
-# We want to allocate the trucks to a level lower than the county, because
-# county boundaries (and therefore centroids) have little relationship with 
-# *where* activity happens in those zones.
-
-# ACS table C24050 has employment by industry for Tracts. Let's just get total
-# employment for now.
-tract_employment <- call_census_api(
-  # All of the counties in the US mapped into FAF zones
-  geoids = paste(cnty2faf$GEOID, "*", sep=""),
-  variables_to_get = "C24050_001E") %>%
-  transmute(
-    county = substr(geoid, 1, 5),
-    tract = geoid,
-    employment = C24050_001E
-  ) %>%
-  
-  # probability is employment in tract divided by employment in county
-  group_by(county) %>%
-  mutate(prob = employment / sum(employment) ) %>%
-  select(-employment)
-
-
-write.csv(tract_employment, "./data/tract_employment.csv", row.names = FALSE)

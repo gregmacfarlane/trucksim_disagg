@@ -186,5 +186,5 @@ FAF <- rbind_all(mclapply(split(FAF, FAF$sctg), mc.cores = cores,
   mutate(trucks = ceiling(trucks))
 
 
-save(FAF, file = "data/faf_trucks.Rdata")
+write.csv(FAF, file = "data/faf_trucks.Rdata", row.names = FALSE)
 

@@ -231,3 +231,5 @@ crossings <- crossings@data %>%
   )
 
 points <- rbind_list(counties, airports, seaports, crossings)
+
+write.csv(points, file = "data/facility_coords.csv", row.names = FALSE)

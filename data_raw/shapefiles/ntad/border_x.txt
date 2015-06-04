@@ -1,0 +1,493 @@
+﻿<metadata>
+  <idinfo>
+    <citation>
+      <citeinfo>
+        <origin>Office of the Assistant Secretary for Research and Technology/Bureau of Transportation Statistics (BTS), Steve Beningo, Transportation Analysis Team</origin>
+        <origin>Customs and Border Protection (CBP)</origin>
+        <pubdate>20110101</pubdate>
+        <title>border_x v. 4</title>
+        <geoform>vector digital data</geoform>
+        <othercit>This data is created and maintained by the Customs and Border Protection (CBP), and spatially enhanced by BTS. The CBP also designated the port codes, names, and attributes.</othercit>
+      </citeinfo>
+    </citation>
+    <descript>
+      <abstract>Border Crossing Ports are points of entry for land modes along the U.S. - Canadian and U.S.- Mexcian borders. The ports of entry are located in 15 states along the U.S. borders. The nominal scale of the data set is 1:1000,000 with a maximal positional error of +- 10 meters.</abstract>
+      <purpose>This dataset is published by USDOT BTS to display ports of entry and its associated data as an online mapping application.</purpose>
+      <supplinf>Used for the interface of Border Crossing/Entry Data: http://www.bts.gov/programs/international/transborder/TBDR_BC/TBDR_BC_Index.html. This data is created and maintained by the Customs and Border Protection (CBP), and spatially enhanced by BTS. The CBP also designated the port codes, names, and attributes. For any questions regarding the CBP data, please contact (877) CBP-5511.</supplinf>
+    </descript>
+    <timeperd>
+      <timeinfo>
+        <sngdate>
+          <caldate>20110101</caldate>
+        </sngdate>
+      </timeinfo>
+      <current>publication date</current>
+    </timeperd>
+    <status>
+      <progress>Complete</progress>
+      <update>Annually</update>
+    </status>
+    <spdom>
+      <bounding>
+        <westbc>-141.001444</westbc>
+        <eastbc>-66.980076</eastbc>
+        <northbc>64.085516</northbc>
+        <southbc>25.883416</southbc>
+      </bounding>
+    </spdom>
+    <keywords>
+      <theme>
+        <themekt>Border Entry, Port of Entry (POE)</themekt>
+        <themekey>Border Crossing</themekey>
+        <themekey>Port</themekey>
+      </theme>
+      <theme>
+        <themekt>ISO 19115 Topic Categories</themekt>
+        <themekey>location</themekey>
+        <themekey>transportation</themekey>
+      </theme>
+      <place>
+        <placekt>None</placekt>
+        <placekey>USA</placekey>
+        <placekey>Mexico</placekey>
+        <placekey>North America</placekey>
+        <placekey>Canada</placekey>
+      </place>
+      <temporal>
+        <tempkt>None</tempkt>
+        <tempkey>2010</tempkey>
+        <tempkey>2011</tempkey>
+        <tempkey>2012</tempkey>
+        <tempkey>2013</tempkey>
+        <tempkey>2014</tempkey>
+      </temporal>
+    </keywords>
+    <accconst>None</accconst>
+    <useconst>The Border Crossing Ports, or any portion thereof, can be freely distributed as long as this metadata entry is included with each distribution. The Original metadata entry cannot be modified or deleted from any data transfer.</useconst>
+    <ptcontac>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>Office of the Assistant Secretary for Research and Technology/Bureau of Transportation Statistics (BTS)</cntorg>
+          <cntper>Steven Beningo</cntper>
+        </cntorgp>
+        <cntpos>International Transportation Specialist</cntpos>
+        <cntaddr>
+          <addrtype>mailing</addrtype>
+          <address>U.S. Department of Transportation</address>
+          <address>Office of the Assistant Secretary for Research and Technology/Bureau of Transportation Statistics (BTS)</address>
+          <city>Washington</city>
+          <state>DC</state>
+          <postal>20590</postal>
+          <country>US</country>
+        </cntaddr>
+        <cntvoice>(202) 366-9683</cntvoice>
+        <cntemail>steven.beningo@dot.gov</cntemail>
+        <hours>8:00AM-4:30PM EST</hours>
+      </cntinfo>
+    </ptcontac>
+    <ptcontac>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>MacroSys LLC</cntorg>
+          <cntper>Zhi Liu</cntper>
+        </cntorgp>
+        <cntpos>Senior GIS/IT Specialist</cntpos>
+        <cntaddr>
+          <addrtype>mailing and physical</addrtype>
+          <address>U.S. Department of Transportation</address>
+          <address>Office of the Assistant Secretary for Research and Technology/Bureau of Transportation Statistics (BTS)</address>
+          <city>Washington</city>
+          <state>DC</state>
+          <postal>20590</postal>
+          <country>US</country>
+        </cntaddr>
+        <cntvoice>202-366-0262</cntvoice>
+        <cntemail>zhi.liu@dot.gov</cntemail>
+        <hours>8:00AM - 4:30PM EST</hours>
+      </cntinfo>
+    </ptcontac>
+    <ptcontac>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>Office of the Assistant Secretary for Research and Technology/Bureau of Transportation Statistics (BTS)</cntorg>
+          <cntper>Office of Geospatial Information Systems</cntper>
+        </cntorgp>
+        <cntaddr>
+          <addrtype>mailing and physical</addrtype>
+          <address>1200 New Jersey Ave., SE</address>
+          <city>Washington</city>
+          <state>DC</state>
+          <postal>20590</postal>
+          <country>US</country>
+        </cntaddr>
+        <cntvoice>202-366-DATA</cntvoice>
+        <cntemail>answers@bts.gov</cntemail>
+      </cntinfo>
+    </ptcontac>
+    <datacred>Zhi Liu (Senior GIS/IT Specialist) 1901 N. Moore Street ,Ste. 509 Arlington, VA 22209</datacred>
+    <native>Microsoft Windows 7 Version 6.1 (Build 7601) Service Pack 1; Esri ArcGIS 10.1.0.3035</native>
+  </idinfo>
+  <dataqual>
+    <attracc>
+      <attraccr>The accuracy of the location data is very high. PortName and PortCode are extracted from the Census website: The link is: http://www.census.gov/foreign-trade/reference/codes/index.html Only 40% of data were converted from .csv files, others were from digitized manually using high resolution image as background (Google Earth).</attraccr>
+    </attracc>
+    <complete>100% complete</complete>
+    <posacc>
+      <horizpa>
+        <horizpar>Within 10 meters</horizpar>
+      </horizpa>
+    </posacc>
+    <lineage>
+      <srcinfo>
+        <srccite>
+          <citeinfo>
+            <onlink>http://www.bts.gov/programs/geographic_information_services/</onlink>
+          </citeinfo>
+        </srccite>
+        <typesrc>None</typesrc>
+      </srcinfo>
+      <procstep>
+        <procdesc>The creation of this geospatial data layer was completed by USDOT-OST-R-BTS in November 2011 and updated in February 2014. Step 1: Convert textual data into shapefile using the ArcGIS function. Step 2: Export the shapefile into KML and display the ports on Google Earth. Each port was checked with road network and country bounderies. Corrections were made for the locations that are far from ports, then record their geographic coordinates. Step 3: Export KML file with port locations into shapefile using the third-party software. Then other attributes were added within ArcGIS.</procdesc>
+        <procdate>20101122</procdate>
+        <proctime>104836</proctime>
+        <proccont>
+          <cntinfo>
+            <cntorgp>
+              <cntorg>MacroSys LLC</cntorg>
+              <cntper>Zhi Liu</cntper>
+            </cntorgp>
+            <cntpos>Senior GIS/IT Specialist</cntpos>
+            <cntaddr>
+              <addrtype>mailing and physical</addrtype>
+              <address>U.S. Department of Transportation</address>
+              <address>Office of the Assistant Secretary for Research and Technology/Bureau of Transportation Statistics (BTS)</address>
+              <city>Washington</city>
+              <state>DC</state>
+              <postal>20590</postal>
+              <country>US</country>
+            </cntaddr>
+            <cntvoice>202-366-0262</cntvoice>
+            <cntemail>zhi.liu@dot.gov</cntemail>
+            <hours>8:00AM - 4:30PM EST</hours>
+          </cntinfo>
+        </proccont>
+      </procstep>
+    </lineage>
+  </dataqual>
+  <spdoinfo>
+    <direct>Vector</direct>
+    <ptvctinf>
+      <sdtsterm>
+        <sdtstype>Entity point</sdtstype>
+        <ptvctcnt>171</ptvctcnt>
+      </sdtsterm>
+    </ptvctinf>
+  </spdoinfo>
+  <spref>
+    <horizsys>
+      <geograph>
+        <latres>8.983152841195215e-009</latres>
+        <longres>8.983152841195215e-009</longres>
+        <geogunit>Decimal Degrees</geogunit>
+      </geograph>
+      <geodetic>
+        <horizdn>D WGS 1984</horizdn>
+        <ellips>WGS 1984</ellips>
+        <semiaxis>6378137.0</semiaxis>
+        <denflat>298.257223563</denflat>
+      </geodetic>
+    </horizsys>
+  </spref>
+  <eainfo>
+    <detailed>
+      <enttyp>
+        <enttypl>border_x</enttypl>
+      </enttyp>
+      <attr>
+        <attrlabl>FID</attrlabl>
+        <attrdef>Internal feature number.</attrdef>
+        <attrdefs>ESRI</attrdefs>
+        <attrdomv>
+          <udom>Sequential unique whole numbers that are automatically generated.</udom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>Shape</attrlabl>
+        <attrdef>Feature geometry.</attrdef>
+        <attrdefs>ESRI</attrdefs>
+        <attrdomv>
+          <udom>Coordinates defining the features.</udom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>PortCode</attrlabl>
+        <attrdef>Port Code</attrdef>
+        <attrdefs>Census Foreign Trade Division, The link is: http://www.census.gov/foreign-trade/reference/codes/index.html</attrdefs>
+      </attr>
+      <attr>
+        <attrlabl>PortName</attrlabl>
+        <attrdef>Port Name</attrdef>
+        <attrdefs>Census Foreign Trade Division, The link is: http://www.census.gov/foreign-trade/reference/codes/index.html</attrdefs>
+      </attr>
+      <attr>
+        <attrlabl>State</attrlabl>
+        <attrdef>U.S. State Abbreviation</attrdef>
+        <attrdefs>Operator</attrdefs>
+      </attr>
+      <attr>
+        <attrlabl>CP_Name</attrlabl>
+        <attrdef>Coustoms Port Name</attrdef>
+        <attrdefs>Since the Border Crossing/Entry data are reported at the U.S. Customs and Border Protection (CBP) port level with unique port codes, a port name must be used to  present the ports which are sharing the same port code (most cases) for the surrounding ports.  For example, Buffalo-Niagara Falls (port code:0901) was selected to present four ports: Buffalo-Peace Bridge, Niagara Falls-Lewiston Bridge,  Niagara Falls-Rainbow Bridge and Niagara Falls-Whirlpool Bridge. The U.S. Census Bureau maintains a list of Customs districts/ports, port codes and descriptions known as the Schedule D.  The most recent Schedule D is available from the U.S. Census Bureau?s Foreign Trade Division at: http://www.census.gov/foreign-trade/schedules/d/dist2.txt.</attrdefs>
+      </attr>
+      <attr>
+        <attrlabl>UNIQUEID</attrlabl>
+        <attrdef>A number that is a unique identifier for each border crossing</attrdef>
+        <attrdefs>USDOT-OST-R-BTS</attrdefs>
+        <attrdomv>
+          <udom>Coordinates defining the features.</udom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>Year</attrlabl>
+        <attrdef>Year of the attribute data</attrdef>
+        <attrdefs>OST-R/BTS-Border Crossing/Entry Data</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>2013</edomv>
+            <edomvd>Year of the attribute information</edomvd>
+            <edomvds>OST-R/BTS-Border Crossing/Entry Data</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>Trucks</attrlabl>
+        <attrdef>Number of arriving trucks; does not include privately owned pick-up trucks.</attrdef>
+        <attrdefs>OST-R/BTS-Border Crossing/Entry Data</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>0</rdommin>
+            <rdommax>1382319</rdommax>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>Loaded_Tru</attrlabl>
+        <attrdef>A container (loaded) is any conveyance entering the U.S. used for commercial purposes, full or empty. In this case, it is the number of full or empty truck containers arriving at a port. This series includes containers moving as inbound shipments.</attrdef>
+        <attrdefs>OST-R/BTS-Border Crossing/Entry Data</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>0</rdommin>
+            <rdommax>984285</rdommax>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>Empty_Truc</attrlabl>
+        <attrdef>A container (empty) is any conveyance entering the U.S. used for commercial purposes, full or empty. In this case, it is the number of full or empty truck containers arriving at a port. This series includes containers moving as inbound shipments.</attrdef>
+        <attrdefs>OST-R/BTS-Border Crossing/Entry Data</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>0</rdommin>
+            <rdommax>457514</rdommax>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>Trains</attrlabl>
+        <attrdef>Number of arriving trains at a particular port.</attrdef>
+        <attrdefs>OST-R/BTS-Border Crossing/Entry Data</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>0</rdommin>
+            <rdommax>3286</rdommax>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>Loaded_Rai</attrlabl>
+        <attrdef>A container (loaded) is any conveyance entering the U.S. used for commercial purposes, full or empty. In this case, it is the number of full or empty rail containers arriving at a port. This series includes containers moving as inbound shipments.</attrdef>
+        <attrdefs>OST-R/BTS-Border Crossing/Entry Data</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>0</rdommin>
+            <rdommax>224202</rdommax>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>Empty_Rai</attrlabl>
+        <attrdef>A container (empty) is any conveyance entering the U.S. used for commercial purposes, full or empty. In this case, it is the number of full or empty rail containers arriving at a port. This series includes containers moving as inbound shipments.</attrdef>
+        <attrdefs>OST-R/BTS-Border Crossing/Entry Data</attrdefs>
+      </attr>
+      <attr>
+        <attrlabl>Train_Pass</attrlabl>
+        <attrdef>Number of passengers and crew arriving by train and requiring U.S. Customs processing.</attrdef>
+        <attrdefs>OST-R/BTS-Border Crossing/Entry Data</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>0</rdommin>
+            <rdommax>64751</rdommax>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>Buses</attrlabl>
+        <attrdef>Number of arriving buses at a particular port, whether or not they are carrying passengers.</attrdef>
+        <attrdefs>OST-R/BTS-Border Crossing/Entry Data</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>0</rdommin>
+            <rdommax>72450</rdommax>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>Bus_Passen</attrlabl>
+        <attrdef>Number of persons arriving by bus requiring U.S. Customs processing.</attrdef>
+        <attrdefs>OST-R/BTS-Border Crossing/Entry Data</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>0</rdommin>
+            <rdommax>883448</rdommax>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>Personal_V</attrlabl>
+        <attrdef>Number of privately owned vehicles (POVs) arriving at a particular port. Includes pick-up trucks, motorcycles, recreational vehicles, taxis, snowmobiles, ambulances, hearses, and other motorized private ground vehicles.</attrdef>
+        <attrdefs>OST-R/BTS-Border Crossing/Entry Data</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>0</rdommin>
+            <rdommax>13354887</rdommax>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>PV_Passeng</attrlabl>
+        <attrdef>Passengers Crossing In Privately Owned Vehicles-Persons entering the United States at a particular port by private automobiles, pick-up trucks, motorcycles, recreational vehicles, taxis, ambulances, hearses, tractors, snowmobiles and other motorized private ground vehicles.</attrdef>
+        <attrdefs>OST-R/BTS-Border Crossing/Entry Data</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>0</rdommin>
+            <rdommax>23934882</rdommax>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>Pedestrian</attrlabl>
+        <attrdef>The number of persons arriving on foot or by certain conveyance (such as bicycles, mopeds, or wheel chairs) requiring U.S. Customs processing.</attrdef>
+        <attrdefs>OST-R/BTS-Border Crossing/Entry Data</attrdefs>
+        <attrdomv>
+          <rdom>
+            <rdommin>0</rdommin>
+            <rdommax>7741210</rdommax>
+          </rdom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>CLASS</attrlabl>
+        <attrdef>Class of the border port. 1 - Port of Entry, 2 - Other Crossing</attrdef>
+        <attrdefs>OST-R/BTS</attrdefs>
+        <attrdomv>
+          <edom>
+            <edomv>1</edomv>
+            <edomvd>Port of Entry</edomvd>
+            <edomvds>OST-R/BTS</edomvds>
+          </edom>
+          <edom>
+            <edomv>2</edomv>
+            <edomvd>Other Crossing</edomvd>
+            <edomvds>OST-R/BTS</edomvds>
+          </edom>
+        </attrdomv>
+      </attr>
+      <attr>
+        <attrlabl>STFIPS</attrlabl>
+        <attrdef>State FIPS code</attrdef>
+        <attrdefs>NIST</attrdefs>
+        <attrdomv>
+          <codesetd>
+            <codesetn>Federal Information Processing Standard (FIPS), Publication 6-4</codesetn>
+            <codesets>National Institute for Standards and Technology (NIST)</codesets>
+          </codesetd>
+        </attrdomv>
+      </attr>
+    </detailed>
+  </eainfo>
+  <distinfo>
+    <distrib>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>Office of the Assistant Secretary for Research and Technology/Bureau of Transportation Statistics (BTS)</cntorg>
+          <cntper>National Transportation Atlas Database (NTAD) 2014</cntper>
+        </cntorgp>
+        <cntpos>Office of Geospatial Information Systems</cntpos>
+        <cntaddr>
+          <addrtype>mailing and physical</addrtype>
+          <address>1200 New Jersey Ave., SE</address>
+          <city>Washington</city>
+          <state>DC</state>
+          <postal>20590</postal>
+          <country>US</country>
+        </cntaddr>
+        <cntvoice>202-366-DATA</cntvoice>
+        <cntemail>answers@bts.gov</cntemail>
+      </cntinfo>
+    </distrib>
+    <resdesc>National Transportation Atlas Databases (NTAD) 2014 DVD</resdesc>
+    <distliab>None</distliab>
+    <stdorder>
+      <digform>
+        <digtinfo>
+          <formname>ESRI Shapefile</formname>
+          <formvern>2013</formvern>
+          <filedec>No compression applied. However, if using digital transfer online option, note access instructions.</filedec>
+          <transize>0.005</transize>
+        </digtinfo>
+        <digtopt>
+          <offoptn>
+            <offmedia>dvd</offmedia>
+          </offoptn>
+        </digtopt>
+      </digform>
+      <fees>None</fees>
+      <ordering>Call (202-366-DATA), or E-mail (answers@bts.gov) BTS to request the National Transportation Atlas Databases (NTAD) 2014 DVD. This and other OST-R/BTS products may be ordered from the BTS Internet site (&lt;http://www.bts.gov/programs/geographic_information_services/&gt;).</ordering>
+    </stdorder>
+    <availabl>
+      <timeinfo>
+        <sngdate>
+          <caldate>20110101</caldate>
+          <time>unknown</time>
+        </sngdate>
+      </timeinfo>
+    </availabl>
+  </distinfo>
+  <metainfo>
+    <metd>20140409</metd>
+    <metc>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>Office of the Assistant Secretary for Research and Technology/Bureau of Transportation Statistics (BTS)</cntorg>
+          <cntper>Zhi Liu</cntper>
+        </cntorgp>
+        <cntpos>Senior GIS/IT Specialist</cntpos>
+        <cntaddr>
+          <addrtype>mailing</addrtype>
+          <address>U.S. Department of Transportation</address>
+          <address>Office of the Assistant Secretary for Research and Technology/Bureau of Transportation Statistics (BTS)</address>
+          <city>Washington</city>
+          <state>DC</state>
+          <postal>20590</postal>
+          <country>US</country>
+        </cntaddr>
+        <cntvoice>(202) 366-0262</cntvoice>
+        <cntemail>zhi.liu@dot.gov</cntemail>
+        <hours>8:00AM-4:30PM EST</hours>
+      </cntinfo>
+    </metc>
+    <metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+    <metstdv>FGDC-STD-001-1998</metstdv>
+    <mettc>local time</mettc>
+  </metainfo>
+</metadata>

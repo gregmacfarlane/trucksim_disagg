@@ -18,6 +18,11 @@ if(is.na(year)){
   year <- 2007
 }
 
+if(is.na(small)){
+	cat("creating small FAF dataset (only Raleigh)")
+	small <- TRUE
+}
+
 years <- c(2007, 2011, 2015, 2020, 2025, 2030, 2035, 2040)
 if(!(year %in% years)){ stop("Please select a valid year") }
 
@@ -53,30 +58,4 @@ if(small == "True"){
 cat("Saving to R binary format\n")
 save(FAF, file = "data/faf_data.Rdata")
 
-# CBP DATA -----
-# Read in the data from the CBP file, impute missing variables, and save as
-# binary format
-cat("Cleaning CBP data\n")
-CBP <- read.csv("data_raw/Cbp07co.txt", stringsAsFactors = FALSE)
-ranges <- read.csv("data_raw/cbp_missingcodes.csv", sep="&", 
-                   colClasses = c("character", "character", "numeric"))
-CBP <- CBP %>% left_join(., ranges, by = "empflag") %>%
-  mutate(emp = ifelse(is.na(empimp), emp, empimp),
-         GEOID = paste(sprintf("%02d", fipstate), # sprintf to pad leading zeros
-                       sprintf("%03d", fipscty), sep="")) %>%
-  filter(fipscty != "999") %>%
-  mutate(naics = gsub("[[:punct:]]", "", naics)) %>%
-  select(naics, emp, GEOID)
-
-# There are some naics codes that don't map very nearly into other categories
-problemnaics <- c("44", "441", "445")
-breakouts <- CBP %>% filter(naics %in% problemnaics) %>%
-  mutate(naics = paste("x", naics, sep = "")) %>%
-  dcast(., formula = GEOID ~ naics, value.var = "emp", fill = 0) %>%
-  mutate(naics = "44",  emp = x44 - x441 - x445, 
-         emp = ifelse(emp < 0, 0, emp)) %>% select(GEOID, naics, emp)  
-
-CBP <- rbind_list(CBP %>% filter(naics != "44"), breakouts)
-
-save(CBP, file = "data/cbp_data.Rdata")
 

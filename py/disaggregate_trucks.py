@@ -56,7 +56,7 @@ def get_start_day():
     :return: a random day of the week. For now all days are the same,
     but we don't have to make it that way. We have a two-week simulation
     """
-    return np.random.randint(1, 14)
+    return np.random.randint(1, 365)
 
 
 def get_departure_time():
@@ -90,7 +90,7 @@ class TruckPlan:
         self.get_time()
 
         # only write the plan if the truck runs in the first week
-        if self.time > 7 * 24 * 3600:
+        if self.time <= 7 * 24 * 3600:
             """
             :rtype : a truck plan with origin, destination, etc.
             """
@@ -100,7 +100,6 @@ class TruckPlan:
             self.sctg = sctg
             self.inmode = inmode
             self.outmode = outmode
-    
     
             # get the origin points ----
             if self.inmode in ['1', '3', '4']:  # imported?
@@ -147,6 +146,8 @@ class TruckPlan:
         # Is the truck going to Alaska?
         if self.destination == '20':
             # is it coming from states on the west coast?
+            # FAF zones have three-digit codes, the first two of which are
+            # the state
             if self.origin[:2] in west_coast_states:
                 # I-5 at the Washington/British Columbia border
                 self.destination = '3004'

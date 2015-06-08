@@ -3,7 +3,7 @@
 # This script assigns the trucks flowing between two FAF regions to counties
 # based on county business patterns and macroeconomic IO tables.
 library(methods)
-require(dplyr)
+require(dplyr, warn.conflicts = FALSE)
 require(dplyrExtras)
 require(foreign)
 require(reshape2)

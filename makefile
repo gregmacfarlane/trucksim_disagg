@@ -1,5 +1,3 @@
-
-
 # How many cores are available on your computer?
 CORES = 4
 
@@ -10,9 +8,6 @@ SIMYEAR = 2007
 # go to or from FAF Zone 373: Raleigh North Carolina.
 SMALL = TRUE
 
-# all the files necessary for the simulation.
-SIMFILES = data/make_table.csv data/use_table.csv data/ienodes.csv data/facility_coords.csv
-
 
 # This is the final simulation file.
 MASTER = population.xml.gz
@@ -20,17 +15,17 @@ MASTER = population.xml.gz
 all: $(MASTER)
 
 
-$(MASTER): $(SIMFILES) py/disaggregate_trucks.py
+$(MASTER): simfiles py/disaggregate_trucks.py
 	@echo Simulating truck O and D
 	@python -m cProfile -o complete_run.prof py/disaggregate_trucks.py	
 
-# Create simfiles
-$(SIMFILES): data/cbp_data.Rdata data/faf_trucks.Rdata R/size_terms.R
+# Create simulation files
+simfiles: data/cbp_data.Rdata data/faf_trucks.Rdata R/size_terms.R
 	@echo creating lookup tables for simulation
 	@Rscript R/size_terms.R
 
 # Split flows into trucks
-data/faf_trucks.Rdata: data/faf_data.Rdata data_raw/trucks/* R/flows_to_trucks.R
+data/faf_trucks.Rdata: data/faf_data.Rdata R/flows_to_trucks.R
 	@echo Converting FAF flows into trucks.
 	@Rscript R/flows_to_trucks.R $(CORES)
 

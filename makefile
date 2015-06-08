@@ -27,6 +27,7 @@ data/cbp_data.Rdata: data_raw/Cbp07co.txt
 data_raw/Cbp07co.txt: data_raw/cbp07co.zip
 	@echo extracting County Business Patterns source data
 	@unzip $< -d $(@D) 
+	@touch $@
 
 data_raw/cbp07co.zip:
 	@echo Downloading County Business Patterns source data 
@@ -35,6 +36,7 @@ data_raw/cbp07co.zip:
 data_raw/faf35_data.csv: data_raw/faf3_5.zip
 	@echo extracting FAF 3.5 region-to-region database
 	@unzip $< -d $(@D)
+	@touch $@
 
 data_raw/faf3_5.zip:
 	@echo Downloading FAF 3.5 region-to-region database

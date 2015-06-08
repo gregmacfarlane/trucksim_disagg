@@ -1,4 +1,5 @@
 
+
 # How many cores are available on your computer?
 CORES = 4
 
@@ -9,18 +10,38 @@ SIMYEAR = 2007
 # go to or from FAF Zone 373: Raleigh North Carolina.
 SMALL = TRUE
 
+# all the files necessary for the simulation.
+SIMFILES = data/make_table.csv data/use_table.csv data/ienodes.csv data/facility_coords.csv
 
 
+# This is the final simulation file.
+MASTER = population.xml.gz
+
+all: $(MASTER)
 
 
-all: data/faf_data.Rdata data/cbp_data.Rdata
+$(MASTER): $(SIMFILES) py/disaggregate_trucks.py
+	@echo Simulating truck O and D
+	@python -m cProfile -o complete_run.prof py/disaggregate_trucks.py	
 
+# Create simfiles
+$(SIMFILES): data/cbp_data.Rdata data/faf_trucks.Rdata R/size_terms.R
+	@echo creating lookup tables for simulation
+	@Rscript R/size_terms.R
+
+# Split flows into trucks
+data/faf_trucks.Rdata: data/faf_data.Rdata data_raw/trucks/* R/flows_to_trucks.R
+	@echo Converting FAF flows into trucks.
+	@Rscript R/flows_to_trucks.R $(CORES)
 
 # Read cleaned source data into R.
+sourcedata: data/faf_data.Rdata data/cbp_data.Rdata
+
+
 data/faf_data.Rdata: data_raw/faf35_data.csv R/prep_FAF.R
 	@Rscript R/prep_FAF.R $(SIMYEAR) $(SMALL)
 
-data/cbp_data.Rdata: data_raw/Cbp07co.txt
+data/cbp_data.Rdata: data_raw/Cbp07co.txt R/prep_CBP.R
 	@Rscript R/prep_CBP.R
 
 # Download and unzip source data from FHWA and Census
@@ -50,9 +71,5 @@ menu:
 	@ echo + sourcedata: .. download source
 	@ echo + clean: ...... delete aux files
 	@ echo + realclean: . delete all output
-	@ echo + Stangle: extract R code into R
-	@ echo + 
-	@ echo + Georgia Tech---------
-	@ echo + --------Civil Engineering
 	@ echo + ==============================
 	

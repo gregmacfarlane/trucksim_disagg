@@ -1,7 +1,7 @@
 # How many cores are available on your computer?
 CORES = 24
 
-# What year to simulate?
+# What year to simulate? Options: 2007, 2011, 2015, 2020, 2025, 2030, 2035, 2040
 SIMYEAR = 2007
 
 # Do you want to do a small disaggregation? This will only model FAF flows that

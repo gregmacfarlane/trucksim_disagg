@@ -1,5 +1,5 @@
 # How many cores are available on your computer?
-CORES = 4
+CORES = 24
 
 # What year to simulate?
 SIMYEAR = 2007
@@ -20,12 +20,12 @@ $(MASTER): simfiles py/disaggregate_trucks.py
 	@python -m cProfile -o complete_run.prof py/disaggregate_trucks.py	
 
 # Create simulation files
-simfiles: data/cbp_data.Rdata data/faf_trucks.Rdata R/size_terms.R
+simfiles: data/cbp_data.Rdata data/faf_trucks.csv R/size_terms.R
 	@echo creating lookup tables for simulation
 	@Rscript R/size_terms.R
 
 # Split flows into trucks
-data/faf_trucks.Rdata: data/faf_data.Rdata R/flows_to_trucks.R
+data/faf_trucks.csv: data/faf_data.Rdata R/flows_to_trucks.R
 	@echo Converting FAF flows into trucks.
 	@Rscript R/flows_to_trucks.R $(CORES)
 
@@ -62,8 +62,9 @@ data_raw/faf3_5.zip:
 menu:
 	@ echo + ==============================
 	@ echo + .......GNU Make menu..........
-	@ echo + all: ........ build population 
+	@ echo + all: .... build population.xml
 	@ echo + sourcedata: .. download source
+	@ echo + simfiles: .... prepare for sim
 	@ echo + clean: ...... delete aux files
 	@ echo + realclean: . delete all output
 	@ echo + ==============================

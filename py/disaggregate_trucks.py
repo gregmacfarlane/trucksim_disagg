@@ -85,44 +85,47 @@ class TruckPlan:
     id_iter = itertools.count(1)
 
     def __init__(self, origin, destination, sctg, inmode, outmode):
-        """
-        :rtype : a truck plan with origin, destination, etc.
-        """
-        self.id = self.id_iter.next()
-        self.origin = origin
-        self.destination = destination
-        self.sctg = sctg
-        self.time = None
-        self.inmode = inmode
-        self.outmode = outmode
-
         # get the departure time ---
+        self.time = None
         self.get_time()
 
-        # get the origin points ----
-        if self.inmode in ['1', '3', '4']:  # imported?
-            try:
-                # If a valid import node exists, use it
-                self.origin = pick_ienode(EXIM_DICT, self.inmode, self.origin)
-            except KeyError:
-                # If it doesn't, just assign like normal
+        # only write the plan if the truck runs in the first week
+        if self.time > 7 * 24 * 3600:
+            """
+            :rtype : a truck plan with origin, destination, etc.
+            """
+            self.id = self.id_iter.next()
+            self.origin = origin
+            self.destination = destination
+            self.sctg = sctg
+            self.inmode = inmode
+            self.outmode = outmode
+    
+    
+            # get the origin points ----
+            if self.inmode in ['1', '3', '4']:  # imported?
+                try:
+                    # If a valid import node exists, use it
+                    self.origin = pick_ienode(EXIM_DICT, self.inmode, self.origin)
+                except KeyError:
+                    # If it doesn't, just assign like normal
+                    self.get_origin()
+            else:
                 self.get_origin()
-        else:
-            self.get_origin()
-
-        # get the destination points ----
-        if self.outmode in ['1', '3', '4']:  # imported?
-            try:
-                # If a valid import node exists, use it
-                self.destination = pick_ienode(EXIM_DICT, self.outmode,
-                                               self.destination)
-            except KeyError:
-                # If it doesn't, just assign like normal
+    
+            # get the destination points ----
+            if self.outmode in ['1', '3', '4']:  # imported?
+                try:
+                    # If a valid import node exists, use it
+                    self.destination = pick_ienode(EXIM_DICT, self.outmode,
+                                                   self.destination)
+                except KeyError:
+                    # If it doesn't, just assign like normal
+                    self.get_destination()
+            else:
                 self.get_destination()
-        else:
-            self.get_destination()
-
-        self.write_plan()
+    
+            self.write_plan()
 
     def display_plan(self):
         print "Origin: ", self.origin, "Destination", self.destination

@@ -56,7 +56,7 @@ def get_start_day():
     :return: a random day of the week. For now all days are the same,
     but we don't have to make it that way. We have a two-week simulation
     """
-    return np.random.randint(1, 365)
+    return np.random.randint(0, 364)
 
 
 def get_departure_time():
@@ -159,7 +159,8 @@ class TruckPlan:
                                            self.destination)
 
     def get_time(self):
-        self.time = get_start_day() * 3600 + get_departure_time()
+        day = get_start_day()
+        self.time = day * 3600 * 24 + get_departure_time()
 
     def write_plan(self):
         person = et.SubElement(population, "person",

@@ -183,13 +183,14 @@ class TruckPlan:
 if __name__ == "__main__":
 
     # Read in the I/O tables and convert them to dictionaries.
+    print "  Reading input tables"
     MAKE_DICT = recur_dictify(pd.read_csv(
-        "./data/make_table.csv",
+        "./data/simfiles/make_table.csv",
         dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
     ))
 
     USE_DICT = recur_dictify(pd.read_csv(
-        "./data/use_table.csv",
+        "./data/simfiles/use_table.csv",
         dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
     ))
 
@@ -204,13 +205,13 @@ if __name__ == "__main__":
     # Exports/Imports are directed to airports, seaports, or highway border
     # crossings in the FAF zone.
     EXIM_DICT = recur_dictify(pd.read_csv(
-        "./data/ienodes.csv",
+        "./data/simfiles/ie_nodes.csv",
         dtype={'F3Z': np.str, 'mode': np.str, 'name': np.str}
     ))
 
     # Geographical points for the activity locations
     FAC_COORDS = pd.read_csv(
-        "./data/facility_coords.csv",
+        "./data/simfiles/facility_coords.csv",
         dtype={'name': np.str}
     ).set_index('name').to_dict()
 
@@ -220,11 +221,14 @@ if __name__ == "__main__":
     pop_file = et.ElementTree(population)
 
     # read in the split trucks file with numbers of trucks going from i to j.
-    faf_trucks = pd.read_csv("./data/faf_trucks.csv",
-                             dtype={'dms_orig': np.str, 'dms_dest': np.str,
-                                    'sctg': np.str, 'trucks': np.int,
-                                    'fr_inmode': np.str, 'fr_outmode': np.str})
+    faf_trucks = pd.read_csv(
+      "./data/simfiles/faf_trucks.csv", 
+      dtype={'dms_orig': np.str, 'dms_dest': np.str, 'sctg': np.str, 
+             'trucks': np.int, 'fr_inmode': np.str, 'fr_outmode': np.str}
+      )
 
+
+    print "  Creating truck plans"   
     # create the appropriate numbers of trucks for each row.
     for index, row in faf_trucks.iterrows():
         [TruckPlan(row['dms_orig'], row['dms_dest'], row['sctg'],

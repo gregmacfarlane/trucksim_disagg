@@ -228,6 +228,6 @@ if __name__ == "__main__":
 
     with gzip.open('population.xml.gz', 'w', compresslevel=0) as f:
         f.write("""<?xml version="1.0" encoding="utf-8"?>
-    <!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v5.dtd">
-    """)
+<!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v5.dtd">
+""")
         pop_file.write(f, pretty_print=True)

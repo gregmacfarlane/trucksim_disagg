@@ -2,14 +2,14 @@
 # ==============================================================
 # This script assigns the trucks flowing between two FAF regions to counties
 # based on county business patterns and macroeconomic IO tables.
-library(methods)
-require(dplyr, warn.conflicts = FALSE)
-require(dplyrExtras)
-require(foreign)
-require(reshape2)
-require(maptools)
-require(sp)
-require(rgdal)
+library(dplyr, warn.conflicts = FALSE)
+suppressMessages(library(dplyrExtras))
+suppressMessages(require(foreign))
+suppressMessages(require(reshape2))
+suppressMessages(require(maptools))
+suppressMessages(require(sp))
+suppressMessages(require(rgdal))
+
 
 source("./R/call_census_api.R")
 

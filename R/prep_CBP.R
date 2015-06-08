@@ -1,4 +1,7 @@
 # CBP DATA -----
+library(dplyr, warn.conflicts = FALSE)
+library(reshape2)
+
 # Read in the data from the CBP file, impute missing variables, and save as
 # binary format
 cat("Cleaning CBP data\n")

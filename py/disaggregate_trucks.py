@@ -56,7 +56,7 @@ def get_start_day():
     :return: a random day of the week. For now all days are the same,
     but we don't have to make it that way. We have a two-week simulation
     """
-    return np.random.randint(1, 14)
+    return np.random.randint(0, 364)
 
 
 def get_departure_time():
@@ -85,44 +85,46 @@ class TruckPlan:
     id_iter = itertools.count(1)
 
     def __init__(self, origin, destination, sctg, inmode, outmode):
-        """
-        :rtype : a truck plan with origin, destination, etc.
-        """
-        self.id = self.id_iter.next()
-        self.origin = origin
-        self.destination = destination
-        self.sctg = sctg
-        self.time = None
-        self.inmode = inmode
-        self.outmode = outmode
-
         # get the departure time ---
+        self.time = None
         self.get_time()
 
-        # get the origin points ----
-        if self.inmode in ['1', '3', '4']:  # imported?
-            try:
-                # If a valid import node exists, use it
-                self.origin = pick_ienode(EXIM_DICT, self.inmode, self.origin)
-            except KeyError:
-                # If it doesn't, just assign like normal
+        # only write the plan if the truck runs in the first week
+        if self.time <= 7 * 24 * 3600:
+            """
+            :rtype : a truck plan with origin, destination, etc.
+            """
+            self.id = self.id_iter.next()
+            self.origin = origin
+            self.destination = destination
+            self.sctg = sctg
+            self.inmode = inmode
+            self.outmode = outmode
+    
+            # get the origin points ----
+            if self.inmode in ['1', '3', '4']:  # imported?
+                try:
+                    # If a valid import node exists, use it
+                    self.origin = pick_ienode(EXIM_DICT, self.inmode, self.origin)
+                except KeyError:
+                    # If it doesn't, just assign like normal
+                    self.get_origin()
+            else:
                 self.get_origin()
-        else:
-            self.get_origin()
-
-        # get the destination points ----
-        if self.outmode in ['1', '3', '4']:  # imported?
-            try:
-                # If a valid import node exists, use it
-                self.destination = pick_ienode(EXIM_DICT, self.outmode,
-                                               self.destination)
-            except KeyError:
-                # If it doesn't, just assign like normal
+    
+            # get the destination points ----
+            if self.outmode in ['1', '3', '4']:  # imported?
+                try:
+                    # If a valid import node exists, use it
+                    self.destination = pick_ienode(EXIM_DICT, self.outmode,
+                                                   self.destination)
+                except KeyError:
+                    # If it doesn't, just assign like normal
+                    self.get_destination()
+            else:
                 self.get_destination()
-        else:
-            self.get_destination()
-
-        self.write_plan()
+    
+            self.write_plan()
 
     def display_plan(self):
         print "Origin: ", self.origin, "Destination", self.destination
@@ -144,6 +146,8 @@ class TruckPlan:
         # Is the truck going to Alaska?
         if self.destination == '20':
             # is it coming from states on the west coast?
+            # FAF zones have three-digit codes, the first two of which are
+            # the state
             if self.origin[:2] in west_coast_states:
                 # I-5 at the Washington/British Columbia border
                 self.destination = '3004'
@@ -155,7 +159,8 @@ class TruckPlan:
                                            self.destination)
 
     def get_time(self):
-        self.time = get_start_day() * 3600 + get_departure_time()
+        day = get_start_day()
+        self.time = day * 3600 * 24 + get_departure_time()
 
     def write_plan(self):
         person = et.SubElement(population, "person",
@@ -178,13 +183,14 @@ class TruckPlan:
 if __name__ == "__main__":
 
     # Read in the I/O tables and convert them to dictionaries.
+    print "  Reading input tables"
     MAKE_DICT = recur_dictify(pd.read_csv(
-        "./data/make_table.csv",
+        "./data/simfiles/make_table.csv",
         dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
     ))
 
     USE_DICT = recur_dictify(pd.read_csv(
-        "./data/use_table.csv",
+        "./data/simfiles/use_table.csv",
         dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
     ))
 
@@ -199,13 +205,13 @@ if __name__ == "__main__":
     # Exports/Imports are directed to airports, seaports, or highway border
     # crossings in the FAF zone.
     EXIM_DICT = recur_dictify(pd.read_csv(
-        "./data/ienodes.csv",
+        "./data/simfiles/ie_nodes.csv",
         dtype={'F3Z': np.str, 'mode': np.str, 'name': np.str}
     ))
 
     # Geographical points for the activity locations
     FAC_COORDS = pd.read_csv(
-        "./data/facility_coords.csv",
+        "./data/simfiles/facility_coords.csv",
         dtype={'name': np.str}
     ).set_index('name').to_dict()
 
@@ -215,11 +221,14 @@ if __name__ == "__main__":
     pop_file = et.ElementTree(population)
 
     # read in the split trucks file with numbers of trucks going from i to j.
-    faf_trucks = pd.read_csv("./data/faf_trucks.csv",
-                             dtype={'dms_orig': np.str, 'dms_dest': np.str,
-                                    'sctg': np.str, 'trucks': np.int,
-                                    'fr_inmode': np.str, 'fr_outmode': np.str})
+    faf_trucks = pd.read_csv(
+      "./data/simfiles/faf_trucks.csv", 
+      dtype={'dms_orig': np.str, 'dms_dest': np.str, 'sctg': np.str, 
+             'trucks': np.int, 'fr_inmode': np.str, 'fr_outmode': np.str}
+      )
 
+
+    print "  Creating truck plans"   
     # create the appropriate numbers of trucks for each row.
     for index, row in faf_trucks.iterrows():
         [TruckPlan(row['dms_orig'], row['dms_dest'], row['sctg'],
@@ -228,6 +237,6 @@ if __name__ == "__main__":
 
     with gzip.open('population.xml.gz', 'w', compresslevel=0) as f:
         f.write("""<?xml version="1.0" encoding="utf-8"?>
-    <!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v5.dtd">
-    """)
+<!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v5.dtd">
+""")
         pop_file.write(f, pretty_print=True)

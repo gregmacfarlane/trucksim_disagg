@@ -8,9 +8,15 @@ SIMYEAR = 2007
 # go to or from FAF Zone 373: Raleigh North Carolina.
 SMALL = TRUE
 
-
 # This is the final simulation file.
 MASTER = population.xml.gz
+
+
+SCRIPTDIR = R/simfiles
+SIMULFDIR = data/simfiles
+
+SCRIPTS  := $(wildcard $(SCRIPTDIR)/*.R)
+SIMFILES := $(SCRIPTS:$(SCRIPTDIR)/%.R=$(SIMULFDIR)/%.csv)
 
 all: $(MASTER)
 
@@ -20,14 +26,14 @@ $(MASTER): simfiles py/disaggregate_trucks.py
 	@python -m cProfile -o complete_run.prof py/disaggregate_trucks.py	
 
 # Create simulation files
-simfiles: data/cbp_data.Rdata data/faf_trucks.csv R/size_terms.R
-	@echo creating lookup tables for simulation
-	@Rscript R/size_terms.R
+simfiles: sourcedata $(SIMFILES) 
 
-# Split flows into trucks
-data/faf_trucks.csv: data/faf_data.Rdata R/flows_to_trucks.R
-	@echo Converting FAF flows into trucks.
-	@Rscript R/flows_to_trucks.R $(CORES)
+# Each simulation table gets created by an R script with the same name in
+# R/simfiles
+$(SIMFILES): $(SIMULFDIR)/%.csv: $(SCRIPTDIR)/%.R
+	@mkdir -p data/simfiles
+	@echo making $@ from $<
+	@Rscript $< $(CORES)
 
 # Read cleaned source data into R.
 sourcedata: data/faf_data.Rdata data/cbp_data.Rdata
@@ -59,6 +65,8 @@ data_raw/faf3_5.zip:
 	@wget -O $@ http://www.ops.fhwa.dot.gov/freight/freight_analysis/faf/faf3/faf3_5.zip
 
 
+
+# Helper calls
 menu:
 	@ echo + ==============================
 	@ echo + .......GNU Make menu..........
@@ -69,3 +77,6 @@ menu:
 	@ echo + realclean: . delete all output
 	@ echo + ==============================
 	
+
+clean:
+	@rm -rf data/*

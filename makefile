@@ -64,8 +64,6 @@ data_raw/faf3_5.zip:
 	@echo Downloading FAF 3.5 region-to-region database
 	@wget -O $@ http://www.ops.fhwa.dot.gov/freight/freight_analysis/faf/faf3/faf3_5.zip
 
-
-
 # Helper calls
 menu:
 	@ echo + ==============================
@@ -73,10 +71,20 @@ menu:
 	@ echo + all: .... build population.xml
 	@ echo + sourcedata: .. download source
 	@ echo + simfiles: .... prepare for sim
-	@ echo + clean: ...... delete aux files
-	@ echo + realclean: . delete all output
+	@ echo + newsim: .. prep for new disagg
+	@ echo + clean: ....... delete simfiles 
+	@ echo + realclean: .... delete sim+src 
 	@ echo + ==============================
-	
 
 clean:
-	@rm -rf data/*
+	@rm -rf data/simfiles/*
+
+realclean: clean
+	@rm data/cbp_data.Rdata
+	@rm data/faf_data.Rdata
+
+newsim:
+	@rm data/simfiles/faf_trucks.csv
+	@rm data/faf_data.Rdata
+	@echo Ready to disaggregate FAF
+

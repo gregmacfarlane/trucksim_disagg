@@ -21,12 +21,9 @@ SIMFILES := $(SCRIPTS:$(SCRIPTDIR)/%.R=$(SIMULFDIR)/%.csv)
 all: $(MASTER)
 
 
-$(MASTER): simfiles py/disaggregate_trucks.py
+$(MASTER): $(SIMFILES) py/disaggregate_trucks.py
 	@echo Simulating truck O and D
 	@python -m cProfile -o complete_run.prof py/disaggregate_trucks.py	
-
-# Create simulation files
-simfiles: sourcedata $(SIMFILES) 
 
 # Each simulation table gets created by an R script with the same name in
 # R/simfiles
@@ -35,9 +32,10 @@ $(SIMFILES): $(SIMULFDIR)/%.csv: $(SCRIPTDIR)/%.R
 	@echo making $@ from $<
 	@Rscript $< $(CORES)
 
+$(SIMULFDIR)/faf_trucks.csv: sourcedata
+
 # Read cleaned source data into R.
 sourcedata: data/faf_data.Rdata data/cbp_data.Rdata
-
 
 data/faf_data.Rdata: data_raw/faf35_data.csv R/prep_FAF.R
 	@Rscript R/prep_FAF.R $(SIMYEAR) $(SMALL)

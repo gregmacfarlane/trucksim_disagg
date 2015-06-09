@@ -7,6 +7,7 @@ import lxml.etree as et
 import itertools
 import multiprocessing as mp
 
+
 def recur_dictify(frame):
     """
     h/t: http://stackoverflow.com/a/19900276/843419
@@ -86,12 +87,13 @@ class TruckPlan:
 
     def __init__(self, origin, destination, sctg, inmode, outmode):
         # get the departure time ---
-        self.time = 1
+        self.time = None
+        self.get_time()
         self.id = self.id_iter.next()
 
         # only write the plan if the truck runs in the first week
         # and only if in a 10% sample
-        if self.time == 1:
+        if (self.time <= 7 * 24 * 3600 and np.random.uniform() < 0.1):
             """
             :rtype : a truck plan with origin, destination, etc.
             """
@@ -100,8 +102,36 @@ class TruckPlan:
             self.sctg = sctg
             self.inmode = inmode
             self.outmode = outmode
-
-            self.write_plan()
+    
+            # get the origin points ----
+            if self.inmode in ['1', '3', '4']:  # imported?
+                try:
+                    # If a valid import node exists, use it
+                    self.origin = pick_ienode(EXIM_DICT, self.inmode, self.origin)
+                except KeyError:
+                    # If it doesn't, just assign like normal
+                    self.get_origin()
+            else:
+                self.get_origin()
+    
+            # get the destination points ----
+            if self.outmode in ['1', '3', '4']:  # imported?
+                try:
+                    # If a valid import node exists, use it
+                    self.destination = pick_ienode(EXIM_DICT, self.outmode,
+                                                   self.destination)
+                except KeyError:
+                    # If it doesn't, just assign like normal
+                    self.get_destination()
+            else:
+                self.get_destination()
+    
+            # Write plan to xml document. This can fail with a serialization
+            # error.
+            try: 
+                self.write_plan()
+            except SerialisationError:
+                self.display_plan()
 
     def display_plan(self):
         print "Id: ", self.id
@@ -148,14 +178,50 @@ class TruckPlan:
         # write elements of plan
         et.SubElement(plan, "act",
                       attrib={'type': "dummy",
-                              'origin': self.origin})
+                              'x': get_coord(self.origin, 'x'),
+                              'y': get_coord(self.origin, 'x'),
+                              'end_time': str(self.time)})
         et.SubElement(plan, "leg", attrib={'mode': "car"})
         et.SubElement(plan, "act",
                       attrib={'type': "dummy",
-                              'destination': self.destination})
+                              'x': get_coord(self.destination, 'x'),
+                              'y': get_coord(self.destination, 'y')})
 
 
 if __name__ == "__main__":
+
+    # Read in the I/O tables and convert them to dictionaries.
+    print "  Reading input tables"
+    MAKE_DICT = recur_dictify(pd.read_csv(
+        "./data/simfiles/make_table.csv",
+        dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
+    ))
+
+    USE_DICT = recur_dictify(pd.read_csv(
+        "./data/simfiles/use_table.csv",
+        dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
+    ))
+
+    # To handle Alaska shipments appropriately, we need to have a list of
+    # states/faf zones where the trucks will either drive down the coast to
+    # Washington or in front of the Rockies to Montana
+    # western states (Washington route): [CA, OR, WA, NV, AZ, ID, UT]
+    west_coast_states = ['06', '41', '53', '32', '04', '16', '49']
+    west_coast_f3z = range(61, 69) + range(411, 419) + range(531, 539) + \
+                     range(321, 329) + range(41, 49) + [160] + range(491, 499)
+
+    # Exports/Imports are directed to airports, seaports, or highway border
+    # crossings in the FAF zone.
+    EXIM_DICT = recur_dictify(pd.read_csv(
+        "./data/simfiles/ie_nodes.csv",
+        dtype={'F3Z': np.str, 'mode': np.str, 'name': np.str}
+    ))
+
+    # Geographical points for the activity locations
+    FAC_COORDS = pd.read_csv(
+        "./data/simfiles/facility_coords.csv",
+        dtype={'name': np.str}
+    ).set_index('name').to_dict()
 
 
     # Create the element tree container
@@ -163,9 +229,19 @@ if __name__ == "__main__":
     pop_file = et.ElementTree(population)
 
     # read in the split trucks file with numbers of trucks going from i to j.
+    faf_trucks = pd.read_csv(
+      "./data/simfiles/faf_trucks.csv", 
+      dtype={'dms_orig': np.str, 'dms_dest': np.str, 'sctg': np.str, 
+             'trucks': np.int, 'fr_inmode': np.str, 'fr_outmode': np.str}
+      )
 
 
-    print "  Creating truck plans"
+    print "  Creating truck plans"   
+    # create the appropriate numbers of trucks for each row.
+    for index, row in faf_trucks.iterrows():
+        [TruckPlan(row['dms_orig'], row['dms_dest'], row['sctg'],
+                   row['fr_inmode'], row['fr_outmode'])
+         for _ in range(row['trucks'])]
 
     pool = mp.Pool(processes=4)
     m = mp.Manager()

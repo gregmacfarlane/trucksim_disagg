@@ -124,9 +124,15 @@ class TruckPlan:
             else:
                 self.get_destination()
     
-            self.write_plan()
+            # Write plan to xml document. This can fail with a serialization
+            # error.
+            try: 
+                self.write_plan()
+            except SerialisationError:
+                self.display_plan()
 
     def display_plan(self):
+        print "Id: ", self.id
         print "Origin: ", self.origin, "Destination", self.destination
 
     def get_origin(self):

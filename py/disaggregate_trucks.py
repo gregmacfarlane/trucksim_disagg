@@ -5,6 +5,7 @@ import gzip
 import numpy as np
 import lxml.etree as et
 import itertools
+import multiprocessing as mp
 
 
 def recur_dictify(frame):
@@ -88,7 +89,6 @@ class TruckPlan:
         # get the departure time ---
         self.time = None
         self.get_time()
-        self.id = self.id_iter.next()
 
         # only write the plan if the truck runs in the first week
         # and only if in a 10% sample
@@ -96,11 +96,13 @@ class TruckPlan:
             """
             :rtype : a truck plan with origin, destination, etc.
             """
+            self.id = self.id_iter.next()
             self.origin = origin
             self.destination = destination
             self.sctg = sctg
             self.inmode = inmode
             self.outmode = outmode
+
     
             # get the origin points ----
             if self.inmode in ['1', '3', '4']:  # imported?
@@ -234,15 +236,22 @@ if __name__ == "__main__":
              'trucks': np.int, 'fr_inmode': np.str, 'fr_outmode': np.str}
       )
 
-
-    print "  Creating truck plans"   
     # create the appropriate numbers of trucks for each row.
-    for index, row in faf_trucks.iterrows():
-        [TruckPlan(row['dms_orig'], row['dms_dest'], row['sctg'],
-                   row['fr_inmode'], row['fr_outmode'])
-         for _ in range(row['trucks'])]
+    print "  Creating truck plans"   
+    
+    # parallel processing infrastructure
+    pool = mp.Pool(processes=mp.cpu_count())
+    m = mp.Manager()
+    q = m.Queue()
 
-    with gzip.open('population.xml.gz', 'w', compresslevel=0) as f:
+    for index, row in faf_trucks.iterrows(): 
+        pool.apply_async([TruckPlan(row['dms_orig'], row['dms_dest'], row['sctg'], 
+            row['fr_inmode'], row['fr_outmode']) 
+            for _ in range(row['trucks'])]
+    )
+
+
+    with gzip.open('population.xml.gz', 'w', compresslevel=4) as f:
         f.write("""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v5.dtd">
 """)

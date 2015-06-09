@@ -5,7 +5,7 @@ import gzip
 import numpy as np
 import lxml.etree as et
 import itertools
-
+import multiprocessing as mp
 
 def recur_dictify(frame):
     """
@@ -165,12 +165,19 @@ if __name__ == "__main__":
     # read in the split trucks file with numbers of trucks going from i to j.
 
 
-    print "  Creating truck plans"   
-    # create the appropriate numbers of trucks for each row.
-    [TruckPlan('orig', 'dest', 'sctg', 'fr_inmode', 'fr_outmode')
-     for _ in range(10000)]
+    print "  Creating truck plans"
 
-    with gzip.open('monolithic.xml', 'w', compresslevel=0) as f:
+    pool = mp.Pool(processes=4)
+    m = mp.Manager()
+    q = m.Queue()
+
+    pool.apply_async(
+        [TruckPlan('orig', 'dest', 'sctg', 'fr_inmode', 'fr_outmode')
+        for _ in range(int(1e4))]
+    )
+
+
+    with gzip.open('parallel.xml.gz', 'w', compresslevel=4) as f:
         f.write("""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v5.dtd">
 """)

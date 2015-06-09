@@ -89,7 +89,6 @@ class TruckPlan:
         # get the departure time ---
         self.time = None
         self.get_time()
-        self.id = self.id_iter.next()
 
         # only write the plan if the truck runs in the first week
         # and only if in a 10% sample
@@ -97,11 +96,13 @@ class TruckPlan:
             """
             :rtype : a truck plan with origin, destination, etc.
             """
+            self.id = self.id_iter.next()
             self.origin = origin
             self.destination = destination
             self.sctg = sctg
             self.inmode = inmode
             self.outmode = outmode
+
     
             # get the origin points ----
             if self.inmode in ['1', '3', '4']:  # imported?
@@ -234,8 +235,6 @@ if __name__ == "__main__":
       dtype={'dms_orig': np.str, 'dms_dest': np.str, 'sctg': np.str, 
              'trucks': np.int, 'fr_inmode': np.str, 'fr_outmode': np.str}
       )
-    faf_trucks = faf_trucks.head(1)
-    print faf_trucks
 
     # create the appropriate numbers of trucks for each row.
     print "  Creating truck plans"   
@@ -251,10 +250,8 @@ if __name__ == "__main__":
             for _ in range(row['trucks'])]
     )
 
-        [TruckPlan('orig', 'dest', 'sctg', 'fr_inmode', 'fr_outmode')
-        for _ in range(int(1e4))]
 
-    with gzip.open('parallel.xml.gz', 'w', compresslevel=4) as f:
+    with gzip.open('population.xml.gz', 'w', compresslevel=4) as f:
         f.write("""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v5.dtd">
 """)

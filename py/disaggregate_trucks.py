@@ -234,24 +234,25 @@ if __name__ == "__main__":
       dtype={'dms_orig': np.str, 'dms_dest': np.str, 'sctg': np.str, 
              'trucks': np.int, 'fr_inmode': np.str, 'fr_outmode': np.str}
       )
+    faf_trucks = faf_trucks.head(1)
+    print faf_trucks
 
-
-    print "  Creating truck plans"   
     # create the appropriate numbers of trucks for each row.
-    for index, row in faf_trucks.iterrows():
-        [TruckPlan(row['dms_orig'], row['dms_dest'], row['sctg'],
-                   row['fr_inmode'], row['fr_outmode'])
-         for _ in range(row['trucks'])]
-
+    print "  Creating truck plans"   
+    
+    # parallel processing infrastructure
     pool = mp.Pool(processes=4)
     m = mp.Manager()
     q = m.Queue()
 
-    pool.apply_async(
-        [TruckPlan('orig', 'dest', 'sctg', 'fr_inmode', 'fr_outmode')
-        for _ in range(int(1e4))]
+    for index, row in faf_trucks.iterrows(): 
+        pool.apply_async([TruckPlan(row['dms_orig'], row['dms_dest'], row['sctg'], 
+            row['fr_inmode'], row['fr_outmode']) 
+            for _ in range(row['trucks'])]
     )
 
+        [TruckPlan('orig', 'dest', 'sctg', 'fr_inmode', 'fr_outmode')
+        for _ in range(int(1e4))]
 
     with gzip.open('parallel.xml.gz', 'w', compresslevel=4) as f:
         f.write("""<?xml version="1.0" encoding="utf-8"?>

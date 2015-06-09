@@ -88,13 +88,14 @@ class TruckPlan:
         # get the departure time ---
         self.time = None
         self.get_time()
+        self.id = self.id_iter.next()
 
         # only write the plan if the truck runs in the first week
-        if self.time <= 7 * 24 * 3600:
+        # and only if in a 10% sample
+        if (self.time <= 7 * 24 * 3600 and np.random.uniform() < 0.1):
             """
             :rtype : a truck plan with origin, destination, etc.
             """
-            self.id = self.id_iter.next()
             self.origin = origin
             self.destination = destination
             self.sctg = sctg

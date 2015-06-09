@@ -240,7 +240,7 @@ if __name__ == "__main__":
     print "  Creating truck plans"   
     
     # parallel processing infrastructure
-    pool = mp.Pool(processes=4)
+    pool = mp.Pool(processes=mp.cpu_count())
     m = mp.Manager()
     q = m.Queue()
 

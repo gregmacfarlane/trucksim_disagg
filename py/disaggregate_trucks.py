@@ -254,7 +254,7 @@ if __name__ == "__main__":
     # n_cores equal parts and do the origin and destination assignment off on
     # all the child cores. When we return all of the TruckPlans objects, we can
     # create their xml nodes and give them new ids.
-    n_cores = mp.cpu_count() - 10  # leave yourself one core
+    n_cores = mp.cpu_count() - 1  # leave yourself one core
     print "  Creating truck plans with ", n_cores, " separate processes"
     p = mp.Pool(processes=n_cores)
     split_dfs = np.array_split(faf_trucks, n_cores)

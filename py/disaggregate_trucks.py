@@ -55,9 +55,9 @@ def pick_ienode(dict_table, mode, zone):
 def get_start_day():
     """
     :return: a random day of the week. For now all days are the same,
-    but we don't have to make it that way. We have a two-week simulation
+    but we don't have to make it that way. We have a one-week simulation
     """
-    return np.random.randint(0, 364)
+    return np.random.randint(0, 6)
 
 
 def get_departure_time():
@@ -79,64 +79,80 @@ def get_departure_time():
 
 
 def get_coord(name, dim):
+    """Get the coordinates of a facility.
+    Args:
+        name: The name of the facility that we need to get the coordinate for.
+        dim: x or y coordinate?
+
+    Returns:
+        A string with the desired coordinate of the facility.
+    """
     return str(FAC_COORDS[dim][name])
 
-class TruckPlan:
-    """Critical information for the truck plan"""
-    id_iter = itertools.count(1)
 
-    def __init__(self, origin, destination, sctg, inmode, outmode):
-        # get the departure time ---
-        self.time = None
-        self.get_time()
+def make_plans(df):
+    l = []
+    for index, row in df.iterrows():
+        # adjust randomly select into a one-week simulation
+        trucks = np.random.binomial(row['trucks'], 7.0 / 365.0)
+        l += [TruckPlan(row) for _ in range(trucks)]
+    return l
 
-        # only write the plan if the truck runs in the first week
-        # and only if in a 10% sample
-        if (self.time <= 7 * 24 * 3600 and np.random.uniform() < 0.1):
-            """
-            :rtype : a truck plan with origin, destination, etc.
-            """
-            self.id = self.id_iter.next()
-            self.origin = origin
-            self.destination = destination
-            self.sctg = sctg
-            self.inmode = inmode
-            self.outmode = outmode
 
+class TruckPlan(object):
+    """Critical information for the truck plan
     
-            # get the origin points ----
-            if self.inmode in ['1', '3', '4']:  # imported?
-                try:
-                    # If a valid import node exists, use it
-                    self.origin = pick_ienode(EXIM_DICT, self.inmode, self.origin)
-                except KeyError:
-                    # If it doesn't, just assign like normal
-                    self.get_origin()
-            else:
+    Attributes:
+        id: A numeric string indicating the truck id. This has to be set later
+        because the different processes won't talk to each other.
+        origin:
+        destination:
+        sctg:
+        inmode:
+        outmode:
+    """
+
+    def __init__(self, row):
+        """
+        :rtype : a truck plan with origin, destination, etc.
+        """
+        self.id = None
+        self.origin = row['dms_orig']
+        self.destination = row['dms_dest']
+        self.sctg = row['sctg']
+        self.inmode = row['fr_inmode']
+        self.outmode = row['fr_outmode']
+        self.time = self.get_time()
+
+        # get the origin points ----
+        if self.inmode in ['1', '3', '4']:  # imported?
+            try:
+                # If a valid import node exists, use it
+                self.origin = pick_ienode(EXIM_DICT, self.inmode, self.origin)
+            except KeyError:
+                # If it doesn't, just assign like normal
                 self.get_origin()
-    
-            # get the destination points ----
-            if self.outmode in ['1', '3', '4']:  # imported?
-                try:
-                    # If a valid import node exists, use it
-                    self.destination = pick_ienode(EXIM_DICT, self.outmode,
-                                                   self.destination)
-                except KeyError:
-                    # If it doesn't, just assign like normal
-                    self.get_destination()
-            else:
+        else:
+            self.get_origin()
+
+        # get the destination points ----
+        if self.outmode in ['1', '3', '4']:  # imported?
+            try:
+                # If a valid import node exists, use it
+                self.destination = pick_ienode(EXIM_DICT, self.outmode,
+                                               self.destination)
+            except KeyError:
+                # If it doesn't, just assign like normal
                 self.get_destination()
-    
-            # Write plan to xml document. This can fail with a serialization
-            # error.
-            try: 
-                self.write_plan()
-            except SerialisationError:
-                self.display_plan()
+        else:
+            self.get_destination()
 
     def display_plan(self):
         print "Id: ", self.id
         print "Origin: ", self.origin, "Destination", self.destination
+
+    def set_id(self, x):
+        self.id = x
 
     def get_origin(self):
         # Is the truck coming from Alaska?
@@ -169,9 +185,9 @@ class TruckPlan:
 
     def get_time(self):
         day = get_start_day()
-        self.time = day * 3600 * 24 + get_departure_time()
+        return day * 3600 * 24 + get_departure_time()
 
-    def write_plan(self):
+    def write_plan(self, population):
         person = et.SubElement(population, "person",
                                attrib={'id': str(self.id)})
         plan = et.SubElement(person, "plan", attrib={'selected': "yes"})
@@ -190,7 +206,6 @@ class TruckPlan:
 
 
 if __name__ == "__main__":
-
     # Read in the I/O tables and convert them to dictionaries.
     print "  Reading input tables"
     MAKE_DICT = recur_dictify(pd.read_csv(
@@ -224,32 +239,41 @@ if __name__ == "__main__":
         dtype={'name': np.str}
     ).set_index('name').to_dict()
 
+    # read in the split trucks file with numbers of trucks going from i to j.
+    faf_trucks = pd.read_csv(
+        "./data/simfiles/faf_trucks.csv",
+        dtype={'dms_orig': np.str, 'dms_dest': np.str, 'sctg': np.str,
+               'trucks': np.int, 'fr_inmode': np.str, 'fr_outmode': np.str}
+    )
+
+    print "  Maximum of", sum(faf_trucks['trucks']), "trucks."
+
+    # The faf_trucks data frame is almost 2 million lines long (for 2007 data).
+    # But this is an embarrassingly parallel process for the most part (more on
+    # ids below). The most efficient way to handle this is to split the data into
+    # n_cores equal parts and do the origin and destination assignment off on
+    # all the child cores. When we return all of the TruckPlans objects, we can
+    # create their xml nodes and give them new ids.
+    n_cores = mp.cpu_count() - 10  # leave yourself one core
+    print "  Creating truck plans with ", n_cores, " separate processes"
+    p = mp.Pool(processes=n_cores)
+    split_dfs = np.array_split(faf_trucks, n_cores)
+    pool_results = p.map(make_plans, split_dfs)   # apply f() to each chunk
+    p.close()  # close child processes
+    p.join()
+    l = [a for L in pool_results for a in L]   # put all TPlans in same list
+    print "  Created plans for", len(l), "trucks."
 
     # Create the element tree container
     population = et.Element("population")
     pop_file = et.ElementTree(population)
 
-    # read in the split trucks file with numbers of trucks going from i to j.
-    faf_trucks = pd.read_csv(
-      "./data/simfiles/faf_trucks.csv", 
-      dtype={'dms_orig': np.str, 'dms_dest': np.str, 'sctg': np.str, 
-             'trucks': np.int, 'fr_inmode': np.str, 'fr_outmode': np.str}
-      )
+    # make new ids and write each truck's plan into the population tree
+    for i, truck in itertools.izip(range(len(l)), l):
+        truck.set_id(i)
 
-    # create the appropriate numbers of trucks for each row.
-    print "  Creating truck plans"   
-    
-    # parallel processing infrastructure
-    pool = mp.Pool(processes=mp.cpu_count())
-    m = mp.Manager()
-    q = m.Queue()
-
-    for index, row in faf_trucks.iterrows(): 
-        pool.apply_async([TruckPlan(row['dms_orig'], row['dms_dest'], row['sctg'], 
-            row['fr_inmode'], row['fr_outmode']) 
-            for _ in range(row['trucks'])]
-    )
-
+    for truck in l:
+        truck.write_plan(population)
 
     with gzip.open('population.xml.gz', 'w', compresslevel=4) as f:
         f.write("""<?xml version="1.0" encoding="utf-8"?>

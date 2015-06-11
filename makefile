@@ -11,7 +11,6 @@ SMALL = TRUE
 # This is the final simulation file.
 MASTER = population.xml.gz
 
-
 SCRIPTDIR = R/simfiles
 SIMULFDIR = data/simfiles
 
@@ -23,7 +22,7 @@ all: $(MASTER)
 
 $(MASTER): py/disaggregate_trucks.py
 	@echo Simulating truck O and D
-	@python -m cProfile -o complete_run.prof $<
+	@python $<
 
 $(MASTER): $(SIMFILES)
 

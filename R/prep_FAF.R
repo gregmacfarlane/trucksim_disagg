@@ -30,6 +30,14 @@ if(!(year %in% years)){ stop("Please select a valid year") }
 # and save as an R binary file.
 cat("Reading original FAF data for ", year, ":\n")
 FAF <- read.csv("data_raw/faf35_data.csv")
+
+# Create a simulation from just RDU for testing
+if(small){
+  print(  "Using smaller data frame")
+  FAF <- FAF %>%
+    filter(dms_orig == "373" | dms_dest == "373")
+}
+
 FAF <- FAF %>% 
   mutate(value_2011 = (value_2007 + value_2015)/2,
          tons_2011  = (tons_2007  + tons_2015)/2,
@@ -48,11 +56,6 @@ FAF <- reshape(FAF, dir = "long", varying = 10:ncol(FAF),
   filter(time == year, dms_mode == 1) %>% # chosen year and trucks only.
   select(-sctg2, -tmiles) 
 
-# Create a simulation from just RDU for testing
-if(small == "True"){
-  FAF <- FAF %>%
-    filter(dms_orig == "373" | dms_dest == "373")
-}
 
 # TODO: Impute missing flows
 cat("Saving to R binary format\n")

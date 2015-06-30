@@ -101,7 +101,7 @@ def make_plans(df):
 
 class TruckPlan(object):
     """Critical information for the truck plan
-    
+
     Attributes:
         id: A numeric string indicating the truck id. This has to be set later
         because the different processes won't talk to each other.

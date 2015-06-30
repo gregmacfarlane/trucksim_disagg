@@ -44,6 +44,9 @@ data/faf_data.Rdata: data_raw/faf35_data.csv R/prep_FAF.R
 data/cbp_data.Rdata: data_raw/Cbp07co.txt R/prep_CBP.R
 	@Rscript R/prep_CBP.R
 
+R/prep_FAF.R: R/prep_BEA.R
+	@Rscript $<
+
 # Download and unzip source data from FHWA and Census
 data_raw/Cbp07co.txt: data_raw/cbp07co.zip
 	@echo extracting County Business Patterns source data

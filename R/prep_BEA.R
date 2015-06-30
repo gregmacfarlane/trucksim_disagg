@@ -17,13 +17,13 @@ gdp <- read_csv(
   # only keep all industries and oil/gas for now.
   filter(Line %in% c(1, 7)) %>%
   mutate(industry = c("all", "oil")) %>%
-  gather(year, gdp, `2006`:`2013`) %>%
-  select(industry, year, gdp)
+  gather(data_year, gdp, `2006`:`2013`, convert = TRUE) %>%
+  select(industry, data_year, gdp)
  
 gdp <- gdp %>%
   # calculate percent change from 2007
   group_by(industry) %>%
-  arrange(year) %>%
+  arrange(data_year) %>%
   mutate(
     gdp = as.numeric(gdp),
     gdp = gdp / gdp[2]

@@ -1,0 +1,55 @@
+---
+title: "GDP-based Adjustments"
+author: "Greg Macfarlane, Parsons Brinckerhoff"
+date: "June 30, 2015"
+output: html_document
+---
+
+```{r setup}
+library(dplyr)
+library(tidyr)
+library(readr)
+library(ggplot2)
+```
+
+
+```{r load_faf}
+FAF <- read_csv("../data_raw/faf35_data.csv")
+```
+
+```{r aggregate}
+faf <- FAF %>%
+  mutate(industry = ifelse(sctg2 %in% 16:19, "oil", "other")) %>%
+  select(industry, value_2007, value_2015) %>%
+  group_by(industry) %>%
+  summarise_each(funs(sum(.))) %>%
+  gather(var, total_shipped, -industry) %>%
+  separate(var, c("var", "year")) %>%
+  group_by(industry) %>% arrange(year) %>%
+  mutate(
+    data = "faf",
+    year = as.numeric(year),
+    value = total_shipped / total_shipped[1]
+  ) %>%
+  select(data, industry, year, value)
+
+bea <- readRDS("../data/gdp_output.rds") %>%
+  mutate(data = "bea") %>%
+  select(data, industry, year = data_year, value = gdp) %>%
+  group_by(data, industry, year) %>%
+  summarise(value = mean(value))
+```
+
+In the plot I compare indexed value over time for two comparable, though not identical, data sets. The dotted lines are the FAF observed 2007 shipped value for all commodities (treating oil and gas separately) and the 2015 forecast. The solid lines are the BEA "gross output" gdp tables for all industries, again breaking out gas and oil. 
+
+```{r plot_data}
+p <- rbind_list(faf, bea)
+ggplot(p, aes(x = year, y = value, color = industry, lty = data)) +
+  geom_path()
+```
+
+Interpolating between the FAF years would severely *overestimate* trucks carrying most commodities (because of the recession), but would severly *understimate* trucks carrying gas and oil (largely because of the shale gas boom that was not predicted in the FAF forecasts).
+
+
+
+

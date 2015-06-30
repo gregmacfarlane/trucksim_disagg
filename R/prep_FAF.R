@@ -19,8 +19,11 @@ if(is.na(year)){
 }
 
 if(is.na(small)){
-	cat("creating small FAF dataset (only Raleigh)")
 	small <- TRUE
+}
+
+if(small){
+	cat("creating small FAF dataset (only Raleigh)")
 }
 
 years <- c(2006:2013, 2015, 2020, 2025, 2030, 2035, 2040)

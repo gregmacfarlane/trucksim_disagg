@@ -94,7 +94,7 @@ def make_plans(df):
     l = []
     for index, row in df.iterrows():
         # adjust randomly select into a one-week simulation
-        trucks = np.random.binomial(row['trucks'], 7.0 / 365.0)
+        trucks = np.random.binomial(row['trucks'], 7.0 / 365.0 * 0.1)
         l += [TruckPlan(row) for _ in range(trucks)]
     return l
 

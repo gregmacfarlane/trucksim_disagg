@@ -1,12 +1,12 @@
 # How many cores are available on your computer?
-CORES = 4
+CORES = 24
 
-# What year to simulate? Options: 2007, 2011, 2015, 2020, 2025, 2030, 2035, 2040
-SIMYEAR = 2007
+# What year to simulate? Options: 2006:2013, 2015, 2020, 2025, 2030, 2035, 2040
+SIMYEAR = 2011
 
 # Do you want to do a small disaggregation? This will only model FAF flows that
 # go to or from FAF Zone 373: Raleigh North Carolina.
-SMALL = TRUE
+SMALL = FALSE
 
 # This is the final simulation file.
 MASTER = population.xml.gz
@@ -33,7 +33,7 @@ $(SIMFILES): $(SIMULFDIR)/%.csv: $(SCRIPTDIR)/%.R
 	@echo making $@ from $<
 	@Rscript $< $(CORES)
 
-$(SIMULFDIR)/faf_trucks.csv: data/faf_data.Rdata 
+$(SIMULFDIR)/faf_trucks.csv: data/faf_data.Rdata
 
 $(SIMULFDIR)/make_table.csv $(SIMULFDIR)/use_table.csv: data/cbp_data.Rdata
 
@@ -50,11 +50,11 @@ R/prep_FAF.R: R/prep_BEA.R
 # Download and unzip source data from FHWA and Census
 data_raw/Cbp07co.txt: data_raw/cbp07co.zip
 	@echo extracting County Business Patterns source data
-	@unzip $< -d $(@D) 
+	@unzip $< -d $(@D)
 	@touch $@
 
 data_raw/cbp07co.zip:
-	@echo Downloading County Business Patterns source data 
+	@echo Downloading County Business Patterns source data
 	@wget -O $@ ftp://ftp.census.gov/econ2007/CBP_CSV/cbp07co.zip
 
 data_raw/faf35_data.csv: data_raw/faf3_5.zip
@@ -74,8 +74,8 @@ menu:
 	@ echo + sourcedata: .. download source
 	@ echo + simfiles: .... prepare for sim
 	@ echo + newsim: .. prep for new disagg
-	@ echo + clean: ....... delete simfiles 
-	@ echo + realclean: .... delete sim+src 
+	@ echo + clean: ....... delete simfiles
+	@ echo + realclean: .... delete sim+src
 	@ echo + ==============================
 
 clean:
@@ -89,4 +89,3 @@ newsim:
 	@rm data/simfiles/faf_trucks.csv
 	@rm data/faf_data.Rdata
 	@echo Ready to disaggregate FAF
-

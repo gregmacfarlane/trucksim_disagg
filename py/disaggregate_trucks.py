@@ -1,11 +1,10 @@
 __author__ = 'Greg'
 
 import pandas as pd
-import gzip
 import numpy as np
-import lxml.etree as et
 import itertools
 import multiprocessing as mp
+import csv
 
 
 def recur_dictify(frame):
@@ -63,7 +62,10 @@ def get_start_day():
     :return: a random day of the week. For now all days are the same,
     but we don't have to make it that way. We have a one-week simulation
     """
-    return np.random.randint(0, NUMBER_DAYS - 1)
+    if NUMBER_DAYS == 1:
+        return 0
+    else:
+        return np.random.randint(0, NUMBER_DAYS - 1)
 
 
 def get_departure_time():
@@ -213,12 +215,19 @@ class TruckPlan(object):
                       attrib={'type': "dummy",
                               'x': get_coord(self.destination, 'x'),
                               'y': get_coord(self.destination, 'y')})
-
+                              
+    def write_detailed_plan(self):
+        row = {'id': self.id,
+               'origin': self.origin,
+               'destination': self.destination,
+               'config': self.type,
+               'sctg': self.sctg}
+        return row
 
 if __name__ == "__main__":
     # sampling rate to use in the simulation
-    SAMPLE_RATE = 0.1
-    NUMBER_DAYS = 3
+    SAMPLE_RATE = 1
+    NUMBER_DAYS = 1
 
     # Read in the I/O tables and convert them to dictionaries.
     print "  Reading input tables"
@@ -278,19 +287,13 @@ if __name__ == "__main__":
     l = [a for L in pool_results for a in L]   # put all TPlans in same list
     print "  Created plans for", len(l), "trucks."
 
-    # Create the element tree container
-    population = et.Element("population")
-    pop_file = et.ElementTree(population)
-
-    # make new ids and write each truck's plan into the population tree
+    # make new ids and write each truck's plan to a CSV
     for i, truck in itertools.izip(range(len(l)), l):
         truck.set_id(i)
 
-    for truck in l:
-        truck.write_plan(population)
-
-    with gzip.open('population.xml.gz', 'w', compresslevel=4) as f:
-        f.write("""<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v5.dtd">
-""")
-        pop_file.write(f, pretty_print=True)
+    with open('population.csv', 'w') as f:
+        columns = ['id', 'origin', 'destination', 'config', 'sctg']
+        writer = csv.DictWriter(f, columns)
+        writer.writeheader()
+        for truck in l:
+            writer.writerow(truck.write_detailed_plan())

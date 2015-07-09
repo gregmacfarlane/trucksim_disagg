@@ -123,6 +123,7 @@ class TruckPlan(object):
         self.inmode = row['fr_inmode']
         self.outmode = row['fr_outmode']
         self.time = self.get_time()
+        self.type = row['type']
 
         # get the origin points ----
         if self.inmode in ['1', '3', '4']:  # imported?

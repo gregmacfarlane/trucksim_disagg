@@ -43,6 +43,19 @@ def pick_county(dict_table, sctg, zone):
         return county
 
 
+def pick_taz(dict_table, county):
+    """
+    :param dict_table: the county-taz lookup table
+    :param county: the predetermined county's FIPS code
+    :return: the TAZ to which the truck is destined
+    """
+    taz = np.random.choice(
+        dict_table[county].keys(),
+        p=dict_table[county].values())
+    return county
+
+
+
 def pick_ienode(dict_table, mode, zone):
     """
     :param dict_table: the dictionary table of import and export nodes.
@@ -209,7 +222,10 @@ class TruckPlan(object):
                 # I-15 at the Montana/Alberta border
                 self.origin = '3310'
         else:
-            self.origin = pick_county(MAKE_DICT, self.sctg, self.origin)
+            self.origin = pick_taz(
+              TAZ_DICT,
+              pick_county(MAKE_DICT, self.sctg, self.origin)
+            )
 
     def get_destination(self):
         # Is the truck going to Alaska?
@@ -224,8 +240,10 @@ class TruckPlan(object):
                 # I-15 at the Montana/Alberta border
                 self.destination = '3310'
         else:
-            self.destination = pick_county(USE_DICT, self.sctg,
-                                           self.destination)
+            self.destination = pick_taz(
+              TAZ_DICT,
+              pick_county(USE_DICT, self.sctg, self.destination)
+            )
 
     def get_time(self):
         day = get_start_day()

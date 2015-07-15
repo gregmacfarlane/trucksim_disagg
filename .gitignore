@@ -29,3 +29,7 @@ data_raw/faf3_5.zip
 data/.directory
 data_raw/.directory
 .directory
+*.xml.gz
+state_to_state_freightAAWDT.csv
+trip_table.csv
+population.csv

@@ -2,6 +2,7 @@ library(dplyr, warn.conflicts = FALSE)
 suppressMessages(require(maptools))
 
 # Imports and Exports ----------------------------------------------------------
+options(stringsAsFactors = FALSE)
 cat("   Determining import and export nodes\n")
 # For imports and exports,  we are told the initial or final FAF zone in the 
 # United States. Because there are a limited number of border crossings, airports,
@@ -19,18 +20,21 @@ FAFzones <- readShapePoly("./data_raw/shapefiles/faf3zone.shp",
 seaports <- readShapePoints("./data_raw/shapefiles/ntad/ports_major.shp",
                             proj4string = WGS84)
 
+seaports_f3z <- over(seaports, FAFzones)$F3Z
+
 seaports <- seaports@data %>% 
-  mutate(
-    name = PORT, 
+  tbl_df() %>%
+  transmute(
+    name = as.character(PORT),
     mode = 3,
     freight = EXPORTS + IMPORTS,
-    F3Z = over(seaports, FAFzones)$F3Z
-  )  %>%
-  
+    F3Z = seaports_f3z
+  ) %>%
+ 
   # FAF zone probability
   group_by(F3Z) %>% 
   mutate(prob = freight/sum(freight)) %>% 
-  ungroup(.) %>%
+  ungroup() %>%
   
   # don't bother keeping stuff we don't need
   filter(prob > 0) %>%  # empty ports
@@ -47,12 +51,13 @@ airfreight <- read.csv("./data_raw/shapefiles/ntad/2006-2010AirFreight.txt",
   filter(Year == "2007") %>%  group_by(name) %>% 
   summarise(freight = sum(Total))
 
+airports_f3z <- over(airports, FAFzones)$F3Z
 
 airports <- airports@data %>%
   mutate(
     name = as.character(LOCID), 
     mode = 4, 
-    F3Z = over(airports, FAFzones)$F3Z
+    F3Z = airports_f3z
   ) %>%
   select(name, F3Z, mode) %>% 
   
@@ -69,10 +74,12 @@ airports <- airports@data %>%
 crossings <- readShapePoints("./data_raw/shapefiles/ntad/border_x.shp",
                              proj4string = WGS84)
 
+crossings_f3z <- over(crossings, FAFzones)$F3Z
+
 crossings <- crossings@data %>% 
   mutate(
     name = PortCode, mode = 1,
-    F3Z = over(crossings, FAFzones)$F3Z
+    F3Z = crossings_f3z
     )  %>%
   filter(Trucks > 0) %>% 
   

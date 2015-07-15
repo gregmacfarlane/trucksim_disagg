@@ -33,7 +33,19 @@ if(!(year %in% years)){ stop("Please select a valid year") }
 # Read in the data from the original csv, remove unneeded years and fields,
 # and save as an R binary file.
 cat("Reading original FAF data for ", year, ":\n")
-FAF <- read_csv("data_raw/faf35_data.csv")
+FAF <- read_csv(
+  "data_raw/faf35_data.csv", 
+  col_types = list(
+    fr_orig = col_character(),
+    dms_orig = col_character(),
+    dms_dest = col_character(),
+    fr_dest = col_character(),
+    fr_inmode = col_character(),
+    fr_outmode = col_character(),
+    sctg2 = col_numeric(),
+    trade_type = col_numeric()
+  )
+) 
 
 # Create a simulation from just RDU for testing
 if(small){
@@ -41,6 +53,7 @@ if(small){
   FAF <- FAF %>%
     filter(dms_orig == "373" | dms_dest == "373")
 }
+
 
 # cleanup
 FAF <- FAF %>%
@@ -56,7 +69,7 @@ FAF <- FAF %>%
   filter(!(dms_orig == "20" & dms_dest == "20")) %>%
   filter(!(dms_orig %in% c("151", "159") & dms_dest %in% c("151", "159"))) %>%
 
-  filter(dms_mode == 1) %>% # chosen year and trucks only.
+  filter(dms_mode == "1") %>%   # trucks only.
   select(-sctg2)
 
 # matrix core variables

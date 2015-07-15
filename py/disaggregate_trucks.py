@@ -42,20 +42,6 @@ def pick_county(dict_table, sctg, zone):
             p=dict_table[zone][sctg].values())
         return county
 
-
-def pick_taz(dict_table, county):
-    """
-    :param dict_table: the county-taz lookup table
-    :param county: the predetermined county's FIPS code
-    :return: the TAZ to which the truck is destined
-    """
-    taz = np.random.choice(
-        dict_table[county].keys(),
-        p=dict_table[county].values())
-    return county
-
-
-
 def pick_ienode(dict_table, mode, zone):
     """
     :param dict_table: the dictionary table of import and export nodes.
@@ -69,6 +55,26 @@ def pick_ienode(dict_table, mode, zone):
         p=dict_table[zone][mode].values())
     return ienode
 
+def pick_taz(county_dict, sctg, point) :
+    """
+    :param county_dict: a dictionary of the simulation points inside the halo that need to be disaggregated to the TAZ level. This has by-commodity fields with make and use coefficients.
+    :param point: The point (either a county or an import/export node) to which the simulation has assigned the shipment.
+    :return: the TAZ to which the truck is destined
+    """
+    if point in COUNTY_TO_TAZ:
+        taz = COUNTY_TO_TAZ[point]
+    else:
+        try:
+            probs = county_dict[point][sctg].values()
+            probs /= sum(probs)   # renormalize probability vector
+            taz = np.random.choice(
+                county_dict[point][sctg].keys(),
+                p=probs
+            )
+        except KeyError:
+            # if it doesn't exist in either dictionary, return NA
+            taz = "NA"
+    return taz
 
 def get_start_day():
     """
@@ -223,7 +229,7 @@ class TruckPlan(object):
                 self.origin = '3310'
         else:
             self.origin = pick_taz(
-              TAZ_DICT,
+              MAKE_LOCAL, self.sctg,
               pick_county(MAKE_DICT, self.sctg, self.origin)
             )
 
@@ -241,7 +247,7 @@ class TruckPlan(object):
                 self.destination = '3310'
         else:
             self.destination = pick_taz(
-              TAZ_DICT,
+              USE_LOCAL, self.sctg,
               pick_county(USE_DICT, self.sctg, self.destination)
             )
 
@@ -291,6 +297,23 @@ if __name__ == "__main__":
     USE_DICT = recur_dictify(pd.read_csv(
         "./data/simfiles/use_table.csv",
         dtype={'sctg': np.str, 'F4Z': np.str, 'name': np.str}
+    ))
+
+    # County to NCSTM tables
+    MAKE_LOCAL = recur_dictify(pd.read_csv(
+        "./data/simfiles/make_local.csv",
+        dtype={'county': np.str, 'sctg': np.str, 'taz': np.str}
+    ))
+
+    USE_LOCAL = recur_dictify(pd.read_csv(
+        "./data/simfiles/use_local.csv",
+        dtype={'county': np.str, 'sctg': np.str, 'taz': np.str}
+    ))
+
+    # NCSTM aggregation tables.
+    COUNTY_TO_TAZ = recur_dictify(pd.read_csv(
+        "./data/simfiles/county_to_taz.csv",
+        dtype={'county': np.str, 'sctg': np.str, 'taz': np.str}
     ))
 
     # To handle Alaska shipments appropriately, we need to have a list of

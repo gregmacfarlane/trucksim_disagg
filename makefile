@@ -1,12 +1,12 @@
 # How many cores are available on your computer?
-CORES = 24
+CORES = 4
 
 # What year to simulate? Options: 2006:2013, 2015, 2020, 2025, 2030, 2035, 2040
 SIMYEAR = 2011
 
 # Do you want to do a small disaggregation? This will only model FAF flows that
 # go to or from FAF Zone 373: Raleigh North Carolina.
-SMALL = FALSE
+SMALL = TRUE
 
 # This is the final simulation file.
 MASTER = population.xml.gz
@@ -39,12 +39,15 @@ $(SIMULFDIR)/make_table.csv $(SIMULFDIR)/use_table.csv: data/cbp_data.Rdata
 
 # Read cleaned source data into R.
 data/faf_data.Rdata: data_raw/faf35_data.csv R/prep_FAF.R
+	@echo Reading FAF data into R
 	@Rscript R/prep_FAF.R $(SIMYEAR) $(SMALL)
 
 data/cbp_data.Rdata: data_raw/Cbp07co.txt R/prep_CBP.R
+	@echo Reading CBP data into R
 	@Rscript R/prep_CBP.R
 
 R/prep_FAF.R: R/prep_BEA.R
+	@echo Reading BEA data into R
 	@Rscript $<
 
 # Download and unzip source data from FHWA and Census
@@ -82,8 +85,8 @@ clean:
 	@rm -rf data/simfiles/*
 
 realclean: clean
-	@rm data/cbp_data.Rdata
-	@rm data/faf_data.Rdata
+	@rm -f data/cbp_data.Rdata
+	@rm -f data/faf_data.Rdata
 
 newsim:
 	@rm data/simfiles/faf_trucks.csv

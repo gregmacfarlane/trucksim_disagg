@@ -151,7 +151,7 @@ FAFzones@data <- FAFzones@data %>% select(F3Z)
 # Calculate Great Circle distance between every zone, and reshape into a lookup
 # table.
 distmatrix <- spDists(FAFzones, longlat = TRUE)
-colnames(distmatrix) <- rownames(distmatrix) <- FAFzones$F3Z
+colnames(distmatrix) <- rownames(distmatrix) <- sprintf("%03d", FAFzones$F3Z)
 distmatrix <- melt(distmatrix, value.name = "distance", as.is = TRUE) %>%
   mutate(dms_orig = as.character(Var1), dms_dest = as.character(Var2),
          distance = cut(distance * 0.621371, # spDists returns kilometers

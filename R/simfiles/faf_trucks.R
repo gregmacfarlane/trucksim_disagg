@@ -158,25 +158,21 @@ distmatrix <- melt(distmatrix, value.name = "distance", as.is = TRUE) %>%
                         breaks = c(0, 50, 100, 200, 500, Inf),
                         include.lowest = TRUE)) %>%
   select(dms_orig, dms_dest, distance)
-
-# Determine whether two zones are adjacent, and put the results in a binary 
-# lookup table
-neighbors <- nb2mat(poly2nb(FAFzones, row.names = FAFzones$F3Z), 
-                    zero.policy = TRUE, style = "B")
-colnames(neighbors) <- rownames(neighbors)
-neighbors <- melt(neighbors, value.name = "adjacent") %>%
-  mutate(dms_orig = as.character(Var1), dms_dest = as.character(Var2),
-         crossing_type = ifelse(adjacent == 1, "land_border", "domestic")) %>%
-  select(dms_orig, dms_dest, crossing_type)
   
 
 # APPLY FACTORS TO FAF DATA ===================================================
 cat("Calculating trucks\n")
 load("data/faf_data.Rdata")
 
-FAF <- left_join(FAF, distmatrix, by = c("dms_dest", "dms_orig")) %>%
-  left_join(., neighbors, by = c("dms_dest", "dms_orig")) %>%
-  tbl_df()
+FAF <- FAF %>%
+  left_join(distmatrix, by = c("dms_dest", "dms_orig")) %>%
+  
+  # identify if the trucks cross a land border: 801 is Canada, 802 is Mexico
+  mutate(
+    crossing_type = ifelse(
+      fr_orig %in% c(801, 802) | fr_dest %in% c(801, 802), 
+      "land_border", "domestic")
+  ) 
 
 FAF <- rbind_all(mclapply(split(FAF, FAF$sctg), mc.cores = cores,
   function(x)  calcTruckloadEquivalencies(x, truck_factors))) %>%

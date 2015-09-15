@@ -146,18 +146,20 @@ simpleTruckloadEquivalencies <- function(flow_records, truck_factors){
 cat("Calculating distance and adjacency\n")
 WGS84 <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 FAFzones <- readShapePoly("data_raw/shapefiles/faf3zone.shp", proj4string = WGS84)
-FAFzones@data <- FAFzones@data %>% select(F3Z)
+F3Z <- FAFzones@data %>% transmute(F3Z = sprintf("%03s", as.character(F3Z))) %>%
+  .$F3Z
 
 # Calculate Great Circle distance between every zone, and reshape into a lookup
 # table.
 distmatrix <- spDists(FAFzones, longlat = TRUE)
-colnames(distmatrix) <- rownames(distmatrix) <- sprintf("%03d", FAFzones$F3Z)
+colnames(distmatrix) <- rownames(distmatrix) <- F3Z
 distmatrix <- melt(distmatrix, value.name = "distance", as.is = TRUE) %>%
-  mutate(dms_orig = as.character(Var1), dms_dest = as.character(Var2),
+  mutate(dms_orig = Var1, dms_dest = Var2,
          distance = cut(distance * 0.621371, # spDists returns kilometers
                         breaks = c(0, 50, 100, 200, 500, Inf),
                         include.lowest = TRUE)) %>%
-  select(dms_orig, dms_dest, distance)
+  select(dms_orig, dms_dest, distance) %>%
+  tbl_df()
   
 
 # APPLY FACTORS TO FAF DATA ===================================================
@@ -169,6 +171,8 @@ FAF <- FAF %>%
   
   # identify if the trucks cross a land border: 801 is Canada, 802 is Mexico
   mutate(
+    dms_orig = as.numeric(dms_orig),
+    dms_dest = as.numeric(dms_dest),
     crossing_type = ifelse(
       fr_orig %in% c(801, 802) | fr_dest %in% c(801, 802), 
       "land_border", "domestic")

@@ -59,9 +59,7 @@ if(small){
 FAF <- FAF %>%
   mutate(
     sctg = sprintf("%02d", sctg2),
-    id = as.character(rownames(.)),
-    dms_orig = as.character(dms_orig),
-    dms_dest = as.character(dms_dest)
+    id = as.character(rownames(.))
   ) %>%
   # Filter out trucks exclusively in Hawaii or Alaska
   #   Alaska is zone 20, and

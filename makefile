@@ -45,8 +45,10 @@ data/faf_data.Rdata: data_raw/faf35_data.csv R/prep_FAF.R
 data/cbp_data.Rdata: data_raw/Cbp07co.txt R/prep_CBP.R
 	@echo Reading CBP data into R
 	@Rscript R/prep_CBP.R
+	
+data/gdp_output.rds: R/prep_CBP.R
 
-R/prep_FAF.R: R/prep_BEA.R
+R/prep_FAF.R: R/prep_BEA.R data/gdp_output.rds
 	@echo Reading BEA data into R
 	@Rscript $<
 
@@ -89,6 +91,6 @@ realclean: clean
 	@rm -f data/faf_data.Rdata
 
 newsim:
-	@rm data/simfiles/faf_trucks.csv
-	@rm data/faf_data.Rdata
+	@rm -f data/simfiles/faf_trucks.csv
+	@rm -f data/faf_data.Rdata
 	@echo Ready to disaggregate FAF

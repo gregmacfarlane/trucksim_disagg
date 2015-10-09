@@ -46,11 +46,11 @@ data/cbp_data.Rdata: data_raw/Cbp07co.txt R/prep_CBP.R
 	@echo Reading CBP data into R
 	@Rscript R/prep_CBP.R
 	
-data/gdp_output.rds: R/prep_CBP.R
-
-R/prep_FAF.R: R/prep_BEA.R data/gdp_output.rds
+data/gdp_output.rds: R/prep_BEA.R data_raw/gdp_output.csv
 	@echo Reading BEA data into R
-	@Rscript $<
+	@Rscript R/prep_BEA.R
+
+R/prep_FAF.R: data/gdp_output.rds
 
 # Download and unzip source data from FHWA and Census
 data_raw/Cbp07co.txt: data_raw/cbp07co.zip

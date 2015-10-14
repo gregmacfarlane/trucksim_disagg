@@ -93,15 +93,15 @@ def get_coord(name, dim):
 def make_plans(df):
     l = []
     for index, row in df.iterrows():
-        # adjust randomly select into a one-week simulation
-        trucks = np.random.binomial(row['trucks'], 7.0 / 365.0)
+        trucks = np.random.binomial(row['trucks'],
+          6 / 365.25 * 1.02159 * SAMPLE_RATE)   # one day, AAWDT, sample rate
         l += [TruckPlan(row) for _ in range(trucks)]
     return l
 
 
 class TruckPlan(object):
     """Critical information for the truck plan
-    
+
     Attributes:
         id: A numeric string indicating the truck id. This has to be set later
         because the different processes won't talk to each other.
@@ -123,6 +123,7 @@ class TruckPlan(object):
         self.inmode = row['fr_inmode']
         self.outmode = row['fr_outmode']
         self.time = self.get_time()
+        self.type = row['type']
 
         # get the origin points ----
         if self.inmode in ['1', '3', '4']:  # imported?
@@ -206,6 +207,9 @@ class TruckPlan(object):
 
 
 if __name__ == "__main__":
+    # sampling rate to use in the simulation
+    SAMPLE_RATE = 1
+
     # Read in the I/O tables and convert them to dictionaries.
     print "  Reading input tables"
     MAKE_DICT = recur_dictify(pd.read_csv(

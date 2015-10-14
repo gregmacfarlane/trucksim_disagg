@@ -1,0 +1,110 @@
+"Gross Output by Industry"
+"[Billions of dollars]" 
+"Bureau of Economic Analysis" 
+"Release Date: April 23, 2015"
+"Line","","2006","2007","2008","2009","2010","2011","2012","2013","2014"
+"    1","    All industries",24888.0,26151.3,26825.7,24657.2,26093.5,27536.0,28703.8,29721.3,31001.4
+"    2","Private industries",22094.3,23204.6,23689.8,21425.9,22754.0,24164.1,25289.4,26291.6,27514.1
+"    3","  Agriculture, forestry, fishing, and hunting",303.5,346.9,380.5,341.9,372.8,434.7,456.3,478.3,463.4
+"    4","    Farms",255.8,302.5,336.1,301.2,328.2,387.0,405.3,426.5,"..."
+"    5","    Forestry, fishing, and related activities",47.7,44.5,44.4,40.8,44.5,47.7,51.0,51.8,"..."
+"    6","  Mining",439.9,471.4,592.4,380.4,463.3,556.1,579.2,630.6,686.5
+"    7","    Oil and gas extraction",271.0,293.6,395.4,223.6,289.7,343.7,348.4,399.2,"..."
+"    8","    Mining, except oil and gas",99.4,103.6,116.5,104.4,114.7,135.9,132.8,128.0,"..."
+"    9","    Support activities for mining",69.5,74.2,80.5,52.4,58.9,76.5,98.0,103.5,"..."
+"    10","  Utilities",410.1,438.2,490.4,389.3,423.5,400.8,366.5,386.6,412.6
+"    11","  Construction",1345.0,1329.4,1266.0,1090.4,1008.3,1008.6,1070.4,1134.9,1217.0
+"    12","  Manufacturing",5052.8,5354.4,5457.8,4469.3,4992.5,5581.9,5801.4,5940.3,6143.6
+"    13","    Durable goods",2613.5,2736.1,2662.4,2118.7,2365.9,2592.4,2779.7,2897.5,3064.4
+"    14","      Wood products",112.9,101.1,87.5,64.4,70.3,70.9,76.4,87.5,"..."
+"    15","      Nonmetallic mineral products",124.9,126.7,113.5,88.9,90.8,92.4,96.3,101.0,"..."
+"    16","      Primary metals",232.5,255.5,279.6,166.0,234.1,279.9,297.7,299.4,"..."
+"    17","      Fabricated metal products",315.5,341.1,356.7,280.4,295.0,328.1,344.7,346.5,"..."
+"    18","      Machinery",325.0,344.7,351.7,284.4,316.1,365.6,403.1,414.3,"..."
+"    19","      Computer and electronic products",412.8,431.1,419.7,353.4,368.7,376.3,368.1,364.9,"..."
+"    20","      Electrical equipment, appliances, and components",117.2,126.5,126.4,101.8,108.3,116.8,118.7,119.6,"..."
+"    21","      Motor vehicles, bodies and trailers, and parts",524.5,513.4,421.1,320.0,422.7,488.8,540.9,600.9,"..."
+"    22","      Other transportation equipment",212.8,261.3,270.7,250.1,248.1,256.4,303.1,325.0,"..."
+"    23","      Furniture and related products",85.3,82.9,77.2,59.7,57.6,60.4,64.0,66.3,"..."
+"    24","      Miscellaneous manufacturing",150.4,151.8,158.3,149.4,154.3,156.9,166.8,172.0,"..."
+"    25","    Nondurable goods",2439.2,2618.3,2795.4,2350.7,2626.6,2989.5,3021.7,3042.9,3079.2
+"    26","      Food and beverage and tobacco products",664.7,715.6,775.5,774.9,804.3,866.8,890.2,910.6,"..."
+"    27","      Textile mills and textile product mills",71.0,63.1,57.4,46.1,49.9,52.4,54.4,55.9,"..."
+"    28","      Apparel and leather and allied products",34.5,26.7,21.7,17.7,18.6,25.8,33.3,29.7,"..."
+"    29","      Paper products",167.4,174.1,177.1,160.0,168.7,174.6,172.5,170.1,"..."
+"    30","      Printing and related support activities",101.0,103.9,99.3,83.8,83.5,83.6,81.2,79.2,"..."
+"    31","      Petroleum and coal products",533.5,602.0,731.6,479.4,601.7,807.6,813.5,795.6,"..."
+"    32","      Chemical products",658.7,727.7,735.6,622.6,714.9,779.7,766.8,784.4,"..."
+"    33","      Plastics and rubber products",208.5,205.3,197.4,166.2,185.1,199.1,209.8,217.3,"..."
+"    34","  Wholesale trade",1196.5,1269.5,1311.4,1092.0,1253.1,1357.8,1437.7,1496.7,1589.7
+"    35","  Retail trade",1295.1,1320.7,1280.7,1222.5,1327.5,1367.6,1451.5,1517.6,1552.9
+"    36","    Motor vehicle and parts dealers",214.0,214.2,187.2,153.2,206.6,211.2,243.3,253.8,"..."
+"    37","    Food and beverage stores",184.2,186.9,194.3,191.9,198.9,206.6,211.7,219.1,"..."
+"    38","    General merchandise stores",184.3,193.9,200.1,208.7,216.6,214.3,210.3,216.1,"..."
+"    39","    Other retail",712.6,725.6,699.2,668.7,705.4,735.5,786.1,828.6,"..."
+"    40","  Transportation and warehousing",818.0,866.9,907.9,773.5,844.7,924.9,966.7,996.4,1056.6
+"    41","    Air transportation",145.1,156.0,165.0,136.3,153.6,170.4,171.5,173.5,"..."
+"    42","    Rail transportation",59.3,61.9,69.5,55.4,67.0,76.1,79.2,81.7,"..."
+"    43","    Water transportation",42.2,48.3,54.7,49.2,54.0,56.6,56.7,58.5,"..."
+"    44","    Truck transportation",276.7,283.2,287.6,233.2,253.4,281.5,301.8,310.1,"..."
+"    45","    Transit and ground passenger transportation",42.3,44.8,45.3,45.1,45.8,48.9,51.7,54.1,"..."
+"    46","    Pipeline transportation",24.4,25.9,29.4,24.0,25.8,27.4,27.8,29.5,"..."
+"    47","    Other transportation and support activities",166.6,177.8,183.3,159.2,168.7,183.6,193.5,202.2,"..."
+"    48","    Warehousing and storage",61.5,69.0,73.0,71.1,76.3,80.4,84.5,86.9,"..."
+"    49","  Information",1165.0,1208.6,1242.7,1205.4,1255.9,1308.8,1369.5,1443.2,1517.3
+"    50","    Publishing industries, except internet (includes software)",292.6,304.4,308.1,286.6,288.2,299.0,302.5,315.7,"..."
+"    51","    Motion picture and sound recording industries",134.3,135.7,132.7,125.9,136.1,137.9,144.0,151.5,"..."
+"    52","    Broadcasting and telecommunications",627.3,648.7,669.2,660.4,690.4,716.7,750.3,786.6,"..."
+"    53","    Data processing, internet publishing, and other information services",110.8,119.8,132.7,132.5,141.2,155.2,172.7,189.5,"..."
+"    54","  Finance, insurance, real estate, rental, and leasing",4533.8,4702.8,4614.8,4420.7,4522.5,4618.7,4835.1,5062.3,5293.6
+"    55","    Finance and insurance",1934.4,2061.5,1979.9,1854.3,1888.8,1907.1,1960.1,2055.9,2152.0
+"    56","      Federal Reserve banks, credit intermediation, and related activities",728.5,737.9,716.7,689.8,664.2,640.9,670.2,688.4,"..."
+"    57","      Securities, commodity contracts, and investments",448.5,503.4,432.7,403.0,418.4,410.2,426.6,450.3,"..."
+"    58","      Insurance carriers and related activities",657.5,703.6,710.4,662.4,699.4,743.8,748.7,789.8,"..."
+"    59","      Funds, trusts, and other financial vehicles",99.9,116.6,120.1,99.2,106.8,112.2,114.7,127.5,"..."
+"    60","    Real estate and rental and leasing",2599.4,2641.3,2635.0,2566.4,2633.7,2711.6,2875.0,3006.4,3141.6
+"    61","      Real estate",2339.9,2373.3,2347.2,2317.4,2367.1,2427.1,2575.4,2696.7,"..."
+"    62","        Housing",1438.4,1496.8,1553.4,1591.0,1605.5,1656.3,1714.0,1775.6,"..."
+"    63","        Other real estate",901.5,876.5,793.8,726.4,761.7,770.8,861.3,921.1,"..."
+"    64","      Rental and leasing services and lessors of intangible assets",259.5,267.9,287.8,249.0,266.6,284.5,299.7,309.7,"..."
+"    65","  Professional and business services",2436.4,2639.2,2738.0,2596.3,2727.5,2885.9,3048.6,3135.6,3309.2
+"    66","    Professional, scientific, and technical services",1429.9,1543.1,1616.4,1548.7,1609.2,1688.0,1770.7,1803.0,1887.9
+"    67","      Legal services",279.1,288.5,287.7,276.4,280.1,289.7,297.9,300.4,"..."
+"    68","      Computer systems design and related services",221.8,249.5,271.5,266.2,289.9,311.1,331.8,341.9,"..."
+"    69","      Miscellaneous professional, scientific, and technical services",929.0,1005.1,1057.2,1006.2,1039.1,1087.2,1141.1,1160.7,"..."
+"    70","    Management of companies and enterprises",384.5,431.7,439.3,415.3,447.1,484.0,531.1,559.2,601.2
+"    71","    Administrative and waste management services",622.0,664.4,682.2,632.2,671.3,713.8,746.8,773.4,820.2
+"    72","      Administrative and support services",549.2,588.6,602.5,558.5,588.6,628.5,660.9,683.6,"..."
+"    73","      Waste management and remediation services",72.8,75.8,79.8,73.8,82.6,85.3,85.9,89.7,"..."
+"    74","  Educational services, health care, and social assistance",1673.5,1774.7,1885.8,1975.2,2058.8,2148.6,2251.1,2352.3,2466.6
+"    75","    Educational services",209.3,227.1,244.4,259.0,279.4,292.8,304.1,319.2,335.4
+"    76","    Health care and social assistance",1464.2,1547.5,1641.4,1716.1,1779.4,1855.8,1947.0,2033.1,2131.3
+"    77","      Ambulatory health care services",674.3,710.9,750.9,777.3,805.2,840.2,881.0,913.9,"..."
+"    78","      Hospitals",503.1,531.1,566.3,602.8,623.7,654.1,695.7,742.1,"..."
+"    79","      Nursing and residential care facilities",162.0,171.5,180.7,186.6,194.2,202.0,207.2,211.6,"..."
+"    80","      Social assistance",124.8,134.1,143.4,149.3,156.3,159.5,163.0,165.5,"..."
+"    81","  Arts, entertainment, recreation, accommodation, and food services",902.4,948.0,969.6,943.1,964.0,1015.2,1074.1,1123.0,1185.6
+"    82","    Arts, entertainment, and recreation",219.8,239.0,246.7,243.1,245.2,255.4,268.9,280.1,295.0
+"    83","      Performing arts, spectator sports, museums, and related activities",115.9,126.3,131.8,132.3,132.2,136.5,143.6,150.4,"..."
+"    84","      Amusements, gambling, and recreation industries",103.9,112.7,114.8,110.8,113.0,118.9,125.3,129.7,"..."
+"    85","    Accommodation and food services",682.6,709.0,723.0,700.0,718.8,759.8,805.2,842.9,890.6
+"    86","      Accommodation",189.4,196.1,197.6,178.4,178.8,189.4,200.5,212.9,"..."
+"    87","      Food services and drinking places",493.1,513.0,525.3,521.6,540.0,570.4,604.8,630.0,"..."
+"    88","  Other services, except government",522.3,533.8,551.6,526.0,539.6,554.7,581.3,593.6,619.4
+"    89","Government",2793.6,2946.7,3135.9,3231.3,3339.6,3371.8,3414.5,3429.7,3487.3
+"    90","  Federal",896.6,934.6,1021.0,1074.2,1146.1,1151.3,1150.3,1100.5,1100.0
+"    91","    General government",804.0,838.6,922.6,978.1,1050.2,1056.7,1052.3,1009.2,"..."
+"    92","      National defense",521.6,548.0,605.9,636.5,676.8,688.3,678.6,643.3,"..."
+"    93","      Nondefense",282.4,290.6,316.7,341.5,373.4,368.4,373.7,365.9,"..."
+"    94","    Government enterprises",92.6,96.0,98.4,96.2,95.9,94.6,98.0,91.2,"..."
+"    95","  State and local",1897.0,2012.1,2114.9,2157.1,2193.4,2220.6,2264.2,2329.2,2387.4
+"    96","    General government",1685.0,1788.0,1879.7,1913.9,1942.3,1961.8,1997.6,2053.1,"..."
+"    97","    Government enterprises",212.0,224.1,235.2,243.2,251.1,258.8,266.6,276.1,"..."
+"    98","Addenda:","","","","","","","","",""
+"    99","    Private goods-producing industries [1]",7141.2,7502.2,7696.8,6282.0,6836.9,7581.2,7907.3,8184.2,8510.5
+"    100","    Private services-producing industries [2]",14953.2,15702.5,15993.0,15143.9,15917.1,16582.9,17382.0,18107.4,19003.5
+"    101","    Information-communications-technology-producing industries [3]",1373.2,1444.1,1493.9,1422.4,1497.8,1573.8,1638.7,1718.1,"..."
+"Legend / Footnotes:"
+"1. Consists of agriculture, forestry, fishing, and hunting; mining; construction; and manufacturing."
+"2. Consists of utilities; wholesale trade; retail trade; transportation and warehousing; information; finance, insurance, real estate, rental, and leasing; professional and business services; educational services, health care, and social assistance; arts, entertainment, recreation, accommodation, and food services; and other services, except government."
+"3. Consists of computer and electronic product manufacturing (excluding navigational, measuring, electromedical, and control instruments manufacturing); software publishers; broadcasting and telecommunications; data processing, hosting and related services; internet publishing and broadcasting and web search portals; and computer systems design and related services."

@@ -15,7 +15,7 @@ args <-commandArgs(TRUE)
 year <- args[1]
 small <- args[2]
 if(is.na(year)){
-  cat("Using default year 2012\n")
+  message("Using default year 2012\n")
   year <- 2012
 }
 
@@ -24,7 +24,7 @@ if(is.na(small)){
 }
 
 if(small){
-	cat("creating small FAF dataset (only Raleigh)")
+	message("creating small FAF dataset (only Raleigh)")
 }
 
 years <- c(2012)
@@ -32,7 +32,7 @@ if(!(year %in% years)){ stop("Please select a valid year") }
 
 # Read in the data from the original csv, remove unneeded years and fields,
 # and save as an R binary file.
-cat("Reading original FAF data for ", year, ":\n")
+message("Reading original FAF data for ", year, ":\n")
 FAF <- read_csv(
   "data_raw/faf4_data.csv", 
   col_types = list(
@@ -49,7 +49,7 @@ FAF <- read_csv(
 
 # Create a simulation from just RDU for testing
 if(small){
-  print(  "Using smaller data frame")
+  message("Using smaller data frame for RDU")
   FAF <- FAF %>%
     filter(dms_orig == "373" | dms_dest == "373")
 }
@@ -96,5 +96,5 @@ if(year == 2012){
 }
 
 # TODO: Impute missing flows
-cat("Saving to R binary format\n")
+message("Saving to R binary format\n")
 save(FAF, file = "data/faf_data.Rdata")

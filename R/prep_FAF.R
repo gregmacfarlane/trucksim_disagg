@@ -15,8 +15,8 @@ args <-commandArgs(TRUE)
 year <- args[1]
 small <- args[2]
 if(is.na(year)){
-  cat("Using default year 2007\n")
-  year <- 2007
+  cat("Using default year 2012\n")
+  year <- 2012
 }
 
 if(is.na(small)){
@@ -27,14 +27,14 @@ if(small){
 	cat("creating small FAF dataset (only Raleigh)")
 }
 
-years <- c(2006:2013, 2015, 2020, 2025, 2030, 2035, 2040)
+years <- c(2012)
 if(!(year %in% years)){ stop("Please select a valid year") }
 
 # Read in the data from the original csv, remove unneeded years and fields,
 # and save as an R binary file.
 cat("Reading original FAF data for ", year, ":\n")
 FAF <- read_csv(
-  "data_raw/faf35_data.csv", 
+  "data_raw/faf4_data.csv", 
   col_types = list(
     fr_orig = col_character(),
     dms_orig = col_character(),
@@ -77,41 +77,22 @@ keep_vars <- c(
   'trade_type'
 )
 
-# If historical data for the simulation year is available, then use that to
-# grow 2007 data to the appropriate year. All commodities use the GDP Gross
-# output total, except for oil and gas industries. These draw from the
-# industry-level gross output for "Oil and Gas", hopefully accounting for
-# some of the growth in shale gas extraction between 2007 and 2015.
-if(year < 2014){
-
-  # read in historical gdp data
-  gdp <- readRDS("data/gdp_output.rds") %>%
-    filter(data_year == year)
-
-  # gdp figures are indexed to 2007, so keep these columns
-  faf_vars <- paste(c('value', 'tons'), "2007", sep = "_")
+if(year == 2012){
+  
+  # use 2012 data
+  faf_vars <- paste(c('value', 'tons'), "2012", sep = "_")
 
   FAF <- FAF %>%
     select_(.dots = c(keep_vars, faf_vars)) %>%
-    left_join(gdp) %>%
-
-    # scale value and tons by gdp factor
-    mutate(
-      value = value_2007 * gdp,
-      tons = tons_2007 * gdp
-    ) %>%
-    select(-value_2007, -tons_2007, -data_year, -industry, -gdp)
-
-} else {  # for future years, just use the FAF forecasts.
-
-  faf_vars <- paste(c('value', 'tons'), year, sep = "_")
-  FAF <- FAF %>%
-    select_(.dots = c(keep_vars, faf_vars)) %>%
-    # give generic name
-    rename_(
-      "value" = faf_vars[1],
-      "tons"  = faf_vars[2]
+    rename(
+      value = value_2012,
+      tons = tons_2012
     )
+
+} else {  # other years unavailable
+  
+  stop("Only 2012 is available from FAF 4.0")
+  
 }
 
 # TODO: Impute missing flows

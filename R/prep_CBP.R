@@ -1,11 +1,12 @@
 # CBP DATA -----
 library(dplyr, warn.conflicts = FALSE)
 library(reshape2)
+library(readr)
 
 # Read in the data from the CBP file, impute missing variables, and save as
 # binary format
 cat("Cleaning CBP data\n")
-CBP <- read.csv("data_raw/Cbp07co.txt", stringsAsFactors = FALSE)
+CBP <- read_csv("data_raw/Cbp12co.txt")
 ranges <- read.csv("data_raw/cbp_missingcodes.csv", sep="&", 
                    colClasses = c("character", "character", "numeric"))
 CBP <- CBP %>% left_join(., ranges, by = "empflag") %>%

@@ -42,7 +42,7 @@ data/faf_data.Rdata: data_raw/faf35_data.csv R/prep_FAF.R
 	@echo Reading FAF data into R
 	@Rscript R/prep_FAF.R $(SIMYEAR) $(SMALL)
 
-data/cbp_data.Rdata: data_raw/Cbp07co.txt R/prep_CBP.R
+data/cbp_data.Rdata: data_raw/Cbp12co.txt R/prep_CBP.R
 	@echo Reading CBP data into R
 	@Rscript R/prep_CBP.R
 	
@@ -53,14 +53,14 @@ data/gdp_output.rds: R/prep_BEA.R data_raw/gdp_output.csv
 R/prep_FAF.R: data/gdp_output.rds
 
 # Download and unzip source data from FHWA and Census
-data_raw/Cbp07co.txt: data_raw/cbp07co.zip
+data_raw/Cbp12co.txt: data_raw/cbp12co.zip
 	@echo extracting County Business Patterns source data
 	@unzip $< -d $(@D)
 	@touch $@
 
-data_raw/cbp07co.zip:
+data_raw/cbp12co.zip:
 	@echo Downloading County Business Patterns source data
-	@wget -O $@ ftp://ftp.census.gov/econ2007/CBP_CSV/cbp07co.zip
+	@wget -O $@ ftp://ftp.census.gov/econ2012/CBP_CSV/cbp12co.zip
 
 data_raw/faf35_data.csv: data_raw/faf3_5.zip
 	@echo extracting FAF 3.5 region-to-region database

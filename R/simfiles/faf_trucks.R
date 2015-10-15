@@ -14,9 +14,12 @@ suppressPackageStartupMessages(require(readr))
 args <-commandArgs(TRUE)
 cores <- args[1]
 
-if(is.na(cores)){stop("please submit the number of processes to use:
-rscript Flows2Trucks.R 4")}
-if(cores > detectCores()){stop("Requested processes exceeds available cores.") }
+if(is.na(cores)){
+  stop("please submit the number of processes to use: rscript Flows2Trucks.R 4")
+}
+if(cores > detectCores()){
+  stop("Requested processes exceeds available cores.") 
+}
 
 
 # DEFINE TRUCK ALLOCATION FACTORS -------------------------------------------
@@ -143,16 +146,17 @@ simpleTruckloadEquivalencies <- function(flow_records, truck_factors){
 # FAF zones and second by whether the zones share a land border. If they do, then
 # there are more empty trucks flowing between the zones. We can determine both 
 # sets of information from the FAF zones shapefile.
-cat("Calculating distance and adjacency\n")
+message("Calculating distance and adjacency\n")
 WGS84 <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
-FAFzones <- readShapePoly("data_raw/shapefiles/faf3zone.shp", proj4string = WGS84)
-F3Z <- FAFzones@data %>% transmute(F3Z = sprintf("%03s", as.character(F3Z))) %>%
-  .$F3Z
+FAFzones <- readShapePoly("data_raw/shapefiles/faf4zone.shp", proj4string = WGS84)
+F4Z <- FAFzones@data %>% 
+  transmute(F4Z = sprintf("%03s", as.character(F4Z))) %>%
+  .$F4Z
 
 # Calculate Great Circle distance between every zone, and reshape into a lookup
 # table.
 distmatrix <- spDists(FAFzones, longlat = TRUE)
-colnames(distmatrix) <- rownames(distmatrix) <- F3Z
+colnames(distmatrix) <- rownames(distmatrix) <- F4Z
 distmatrix <- melt(distmatrix, value.name = "distance", as.is = TRUE) %>%
   mutate(dms_orig = Var1, dms_dest = Var2,
          distance = cut(distance * 0.621371, # spDists returns kilometers
@@ -163,7 +167,7 @@ distmatrix <- melt(distmatrix, value.name = "distance", as.is = TRUE) %>%
   
 
 # APPLY FACTORS TO FAF DATA ===================================================
-cat("Calculating trucks\n")
+message("Calculating trucks\n")
 load("data/faf_data.Rdata")
 
 FAF <- FAF %>%
@@ -178,8 +182,10 @@ FAF <- FAF %>%
       "land_border", "domestic")
   ) 
 
-FAF <- rbind_all(mclapply(split(FAF, FAF$sctg), mc.cores = cores,
-  function(x)  calcTruckloadEquivalencies(x, truck_factors))) %>%
+FAF <- rbind_all(
+  mclapply(split(FAF, FAF$sctg), mc.cores = cores,
+  function(x)  calcTruckloadEquivalencies(x, truck_factors))
+  ) %>%
   # if less than a quarter of a truck, don't count it.
   filter(trucks > 0.25) %>%
   # and then round up the rest

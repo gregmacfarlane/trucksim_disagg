@@ -2,7 +2,7 @@
 CORES = 4
 
 # What year to simulate? Options: 2006:2013, 2015, 2020, 2025, 2030, 2035, 2040
-SIMYEAR = 2011
+SIMYEAR = 2012
 
 # Do you want to do a small disaggregation? This will only model FAF flows that
 # go to or from FAF Zone 373: Raleigh North Carolina.
@@ -38,7 +38,7 @@ $(SIMULFDIR)/faf_trucks.csv: data/faf_data.Rdata
 $(SIMULFDIR)/make_table.csv $(SIMULFDIR)/use_table.csv: data/cbp_data.Rdata
 
 # Read cleaned source data into R.
-data/faf_data.Rdata: data_raw/faf35_data.csv R/prep_FAF.R
+data/faf_data.Rdata: data_raw/faf4_data.csv R/prep_FAF.R
 	@echo Reading FAF data into R
 	@Rscript R/prep_FAF.R $(SIMYEAR) $(SMALL)
 
@@ -62,14 +62,11 @@ data_raw/cbp12co.zip:
 	@echo Downloading County Business Patterns source data
 	@wget -O $@ ftp://ftp.census.gov/econ2012/CBP_CSV/cbp12co.zip
 
-data_raw/faf35_data.csv: data_raw/faf3_5.zip
-	@echo extracting FAF 3.5 region-to-region database
-	@unzip $< -d $(@D)
+data_raw/faf4_data.csv:
+	@echo downloading FAF 4.0 data table
+	@wget -O $@ http://www.rita.dot.gov/bts/sites/rita.dot.gov.bts/files/AdditionalAttachmentFiles/FAF4_0%20data.csv
 	@touch $@
 
-data_raw/faf3_5.zip:
-	@echo Downloading FAF 3.5 region-to-region database
-	@wget -O $@ http://www.ops.fhwa.dot.gov/freight/freight_analysis/faf/faf3/faf3_5.zip
 
 # Helper calls
 menu:

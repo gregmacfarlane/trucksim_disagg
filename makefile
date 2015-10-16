@@ -55,17 +55,27 @@ R/prep_FAF.R: data/gdp_output.rds
 # Download and unzip source data from FHWA and Census
 data_raw/Cbp12co.txt: data_raw/cbp12co.zip
 	@echo extracting County Business Patterns source data
-	@unzip $< -d $(@D)
+	@unzip $< -d $(@d)
 	@touch $@
 
 data_raw/cbp12co.zip:
-	@echo Downloading County Business Patterns source data
+	@echo Downloading County Business Patterns employment data
 	@wget -O $@ ftp://ftp.census.gov/econ2012/CBP_CSV/cbp12co.zip
 
 data_raw/faf4_data.csv:
 	@echo downloading FAF 4.0 data table
 	@wget -O $@ http://www.rita.dot.gov/bts/sites/rita.dot.gov.bts/files/AdditionalAttachmentFiles/FAF4_0%20data.csv
 	@touch $@
+	
+data_raw/cfs_pums.csv: data_raw/cfs_pums.zip
+	@echo extracting CFS PUMS file
+	@unzip $< -d data_raw
+	@mv data_raw/cfs_2012_pumf_csv.txt $@
+	@touch $@
+	
+data_raw/cfs_pums.zip:
+	@echo downloading CSF PUMS file
+	@wget -O $@ http://www.census.gov/econ/cfs/2012/cfs_2012_pumf_csv.zip
 
 
 # Helper calls

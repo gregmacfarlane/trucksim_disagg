@@ -12,11 +12,11 @@ load("./data/cbp_data.Rdata")
 load("./data/io/make_table.Rdata")
 
 cnty2faf <- read.dbf("./data_raw/shapefiles/cnty2faf.dbf") %>%
+  tbl_df() %>%
   transmute(
-    GEOID = as.character(GEOID), 
-    F3Z = as.character(F3Z)
-  ) %>%
-  mutate(F3Z = ifelse(F3Z == "441", "440", F3Z))
+    GEOID = as.character(ANSI_ST_CO), 
+    F4Z = as.character(F4Z)
+  ) 
 
 # Lookup table with the probability of a county within a FAF zone producing
 # a given commodity determined as the county's share of relevant NAICS 
@@ -33,10 +33,10 @@ CountyLabor <- inner_join(CBP, maketable, by = "naics") %>%
   
   # which FAF zone is the county in?
   left_join(., cnty2faf, by = "GEOID") %>%
-  mutate(F3Z = as.character(F3Z)) %>%
+  mutate(F4Z = as.character(F4Z)) %>%
   
   # What is the county's share of the FAF-zone employment?
-  group_by(F3Z, sctg) %>% 
+  group_by(F4Z, sctg) %>% 
   mutate(
     prob = emp/sum(emp), 
     # origin name
@@ -44,8 +44,8 @@ CountyLabor <- inner_join(CBP, maketable, by = "naics") %>%
   ) %>% ungroup() %>%
   
   # cleanup
-  select(F3Z, sctg, name, prob) %>%
-  arrange(F3Z, sctg) %>% tbl_df()
+  select(F4Z, sctg, name, prob) %>%
+  arrange(F4Z, sctg) %>% tbl_df()
 
 write.csv(CountyLabor, "./data/simfiles/make_table.csv", row.names = FALSE)
 

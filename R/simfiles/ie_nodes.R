@@ -13,14 +13,14 @@ cat("   Determining import and export nodes\n")
 # First, we load the shapefiles for ports, airports, and border crossings and
 # determine which FAF zone they are located in.
 WGS84 <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
-FAFzones <- readShapePoly("./data_raw/shapefiles/faf3zone.shp", 
+FAFzones <- readShapePoly("./data_raw/shapefiles/faf4zone.shp", 
                           proj4string = WGS84)
 
 # Seaports
 seaports <- readShapePoints("./data_raw/shapefiles/ntad/ports_major.shp",
                             proj4string = WGS84)
 
-seaports_f3z <- over(seaports, FAFzones)$F3Z
+seaports_f4z <- over(seaports, FAFzones)$F4Z
 
 seaports <- seaports@data %>% 
   tbl_df() %>%
@@ -28,17 +28,17 @@ seaports <- seaports@data %>%
     name = as.character(PORT),
     mode = 3,
     freight = EXPORTS + IMPORTS,
-    F3Z = seaports_f3z
+    F4Z = seaports_f4z
   ) %>%
  
   # FAF zone probability
-  group_by(F3Z) %>% 
+  group_by(F4Z) %>% 
   mutate(prob = freight/sum(freight)) %>% 
   ungroup() %>%
   
   # don't bother keeping stuff we don't need
   filter(prob > 0) %>%  # empty ports
-  select(name, prob, mode, F3Z) 
+  select(name, prob, mode, F4Z) 
 
 # Airports
 airports <- readShapePoints("./data_raw/shapefiles/ntad/airports.shp",
@@ -51,47 +51,47 @@ airfreight <- read.csv("./data_raw/shapefiles/ntad/2006-2010AirFreight.txt",
   filter(Year == "2007") %>%  group_by(name) %>% 
   summarise(freight = sum(Total))
 
-airports_f3z <- over(airports, FAFzones)$F3Z
+airports_f4z <- over(airports, FAFzones)$F4Z
 
 airports <- airports@data %>%
   mutate(
     name = as.character(LOCID), 
     mode = 4, 
-    F3Z = airports_f3z
+    F4Z = airports_f4z
   ) %>%
-  select(name, F3Z, mode) %>% 
+  select(name, F4Z, mode) %>% 
   
   # calculate probability of airport by FAF zone
   inner_join(., airfreight, by = "name")  %>%
-  group_by(F3Z) %>%  
+  group_by(F4Z) %>%  
   mutate(prob = freight/sum(freight)) %>% ungroup(.) %>%
   
   # keep only what we need
-  select(name, prob, mode, F3Z)
+  select(name, prob, mode, F4Z)
 
 
 # Border crossings
 crossings <- readShapePoints("./data_raw/shapefiles/ntad/border_x.shp",
                              proj4string = WGS84)
 
-crossings_f3z <- over(crossings, FAFzones)$F3Z
+crossings_f4z <- over(crossings, FAFzones)$F4Z
 
 crossings <- crossings@data %>% 
   mutate(
     name = PortCode, mode = 1,
-    F3Z = crossings_f3z
+    F4Z = crossings_f4z
     )  %>%
   filter(Trucks > 0) %>% 
   
-  group_by(F3Z) %>%
+  group_by(F4Z) %>%
   mutate(prob = Trucks / sum(Trucks)) %>% ungroup(.) %>%
-  select(name, prob, mode, F3Z)
+  select(name, prob, mode, F4Z)
 
 # Bind the three crossing types into a single lookup table. 
 ienodes <- rbind_list(seaports, airports, crossings) %>%
-  mutate(F3Z = as.character(F3Z)) %>%
-  select(F3Z, mode, name, prob) %>%
-  arrange(F3Z, mode)
+  mutate(F4Z = as.character(F4Z)) %>%
+  select(F4Z, mode, name, prob) %>%
+  arrange(F4Z, mode)
 
 write.csv(ienodes, "./data/simfiles/ie_nodes.csv", row.names = FALSE)
 

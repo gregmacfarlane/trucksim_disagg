@@ -1,18 +1,21 @@
 library(dplyr, warn.conflicts = FALSE)
 suppressMessages(library(maptools))
 suppressMessages(library(rgdal))
+suppressMessages(library(rgeos))
 # Activity Coordinates ------
 # This script creates a table with the geographic coordinates for all the points
 # that trucks in the simulation can use.
 
-cat("   Making table of facility coordinates.\n")
+message("Making table of facility coordinates.\n")
 WGS84 <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
-LCC <- CRS("+proj=lcc +lat_1=49 +lat_2=45 +lat_0=44.25 +lon_0=-109.5 
-           +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs")
+LCC <- CRS("+init=epsg:2818")
 
-counties <- readShapePoints("data_raw/shapefiles/cnty2faf.shp",
-                            proj4string = WGS84) %>%
-  spTransform(LCC)
+counties <- readShapePoly("data_raw/shapefiles/cnty2faf.shp",
+                          proj4string = WGS84) %>%
+  spTransform(LCC) 
+
+county_points%
+  gCentroid(., byid = TRUE)
 
 counties <- counties@data %>%
   transmute(

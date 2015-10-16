@@ -12,10 +12,9 @@ load("./data/io/use_table.Rdata")
 # County-to-FAF lookup table
 cnty2faf <- read.dbf("./data_raw/shapefiles/cnty2faf.dbf") %>%
   transmute(
-    GEOID = as.character(GEOID), 
-    F3Z = as.character(F3Z)
-  ) %>%
-  mutate(F3Z = ifelse(F3Z == "441", "440", F3Z))
+    GEOID = as.character(ANSI_ST_CO), 
+    F4Z = as.character(F4Z)
+  ) 
   
 
 CountyDemand <- inner_join(CBP, usetable, by = "naics") %>%
@@ -29,8 +28,8 @@ CountyDemand <- inner_join(CBP, usetable, by = "naics") %>%
   
   # which FAF zone is the county in?
   left_join(., cnty2faf, by = "GEOID") %>% 
-  mutate(F3Z = as.character(F3Z)) %>%
-  group_by(F3Z, sctg) %>% 
+  mutate(F4Z = as.character(F4Z)) %>%
+  group_by(F4Z, sctg) %>% 
   
   mutate(
     prob = emp/sum(emp), 
@@ -38,7 +37,7 @@ CountyDemand <- inner_join(CBP, usetable, by = "naics") %>%
   ) %>% ungroup(.) %>%
   
   # cleanup
-  select(F3Z, sctg, name, prob) %>%
-  arrange(F3Z, sctg) %>% tbl_df()
+  select(F4Z, sctg, name, prob) %>%
+  arrange(F4Z, sctg) %>% tbl_df()
 
 write.csv(CountyDemand, "./data/simfiles/use_table.csv", row.names = FALSE)

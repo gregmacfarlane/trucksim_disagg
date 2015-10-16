@@ -37,6 +37,8 @@ $(SIMULFDIR)/faf_trucks.csv: data/faf_data.Rdata
 
 $(SIMULFDIR)/make_table.csv $(SIMULFDIR)/use_table.csv: data/cbp_data.Rdata
 
+$(SIMULFDIR)/make_table.csv: data_raw/cfs_pums.csv
+
 # Read cleaned source data into R.
 data/faf_data.Rdata: data_raw/faf4_data.csv R/prep_FAF.R
 	@echo Reading FAF data into R

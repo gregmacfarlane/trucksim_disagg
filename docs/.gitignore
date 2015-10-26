@@ -1,1 +1,4 @@
 gdp_interpolation.html
+parallel_python.md
+.ipynb_checkpoints/*
+multiprocessing_demo.ipynb

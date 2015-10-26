@@ -72,6 +72,8 @@ maketable <- cfs %>%
   group_by(naics) %>%
   mutate(makecoef = value / sum(value))
 
+# you will need the make coefficients to consruct the use table.
+saveRDS(maketable, "data/io/makecoefs.rds")
 
 #
 cnty2faf <- read.dbf("./data_raw/shapefiles/cnty2faf.dbf") %>%

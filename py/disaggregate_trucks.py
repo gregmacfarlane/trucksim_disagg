@@ -111,6 +111,8 @@ class TruckPlan(object):
         inmode:
         outmode:
     """
+    __slots__ = ['id', 'origin', 'destination', 'sctg', 'inmode', 'outmode',
+     'time', 'type']
 
     def __init__(self, row):
         """
@@ -214,12 +216,12 @@ if __name__ == "__main__":
     print "  Reading input tables"
     MAKE_DICT = recur_dictify(pd.read_csv(
         "./data/simfiles/make_table.csv",
-        dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
+        dtype={'sctg': np.str, 'F4Z': np.str, 'name': np.str}
     ))
 
     USE_DICT = recur_dictify(pd.read_csv(
         "./data/simfiles/use_table.csv",
-        dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
+        dtype={'sctg': np.str, 'F4Z': np.str, 'name': np.str}
     ))
 
     # To handle Alaska shipments appropriately, we need to have a list of
@@ -234,7 +236,7 @@ if __name__ == "__main__":
     # crossings in the FAF zone.
     EXIM_DICT = recur_dictify(pd.read_csv(
         "./data/simfiles/ie_nodes.csv",
-        dtype={'F3Z': np.str, 'mode': np.str, 'name': np.str}
+        dtype={'F4Z': np.str, 'mode': np.str, 'name': np.str}
     ))
 
     # Geographical points for the activity locations

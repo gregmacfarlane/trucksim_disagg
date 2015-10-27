@@ -6,7 +6,7 @@ SIMYEAR = 2012
 
 # Do you want to do a small disaggregation? This will only model FAF flows that
 # go to or from FAF Zone 373: Raleigh North Carolina.
-SMALL = TRUE
+SMALL = FALSE
 
 # This is the final simulation file.
 MASTER = population.xml.gz

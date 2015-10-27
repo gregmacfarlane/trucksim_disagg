@@ -93,8 +93,9 @@ def get_coord(name, dim):
 def make_plans(df):
     l = []
     for index, row in df.iterrows():
+        # sample down the number of trucks to the simulation period
         trucks = np.random.binomial(row['trucks'],
-          6 / 365.25 * 1.02159 * SAMPLE_RATE)   # one day, AAWDT, sample rate
+          3 / 365.25 * 1.02159 * SAMPLE_RATE)
         l += [TruckPlan(row) for _ in range(trucks)]
     return l
 
@@ -210,7 +211,7 @@ class TruckPlan(object):
 
 if __name__ == "__main__":
     # sampling rate to use in the simulation
-    SAMPLE_RATE = 1
+    SAMPLE_RATE = 0.05
 
     # Read in the I/O tables and convert them to dictionaries.
     print "  Reading input tables"

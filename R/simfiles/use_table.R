@@ -31,7 +31,7 @@ use_data_list <- lapply(use_data_xmllist, function(x){
 usetable <- rbind_all(use_data_list) %>%
   tbl_df() %>%
   select(make_naics = rowCode, use_naics = colcode, trade = DataValue) %>%
-  mutate(trade = as.numeric(trade)) %>%
+  mutate(trade = ifelse(as.numeric(trade) < 0, 0, as.numeric(trade))) %>%
 
   # The table contains the dollar value of goods sold to other industries,
   # Government, and to final users of different types. We only consider other
@@ -64,7 +64,7 @@ usetable <- usetable %>%
   # join information about commodity production by NAICS
   inner_join(maketable, by = "make_naics") %>%
   group_by(sctg, use_naics) %>%
-  summarise(trade = sum(trade)) %>%
+  summarise(trade = sum(trade * makecoef)) %>%
   mutate(usecoef = trade / sum(trade)) %>%
   rename(naics = use_naics)
 

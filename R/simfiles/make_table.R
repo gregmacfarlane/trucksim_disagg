@@ -23,25 +23,25 @@ impute_sctg <- function(sctg){
   
   # if the sctg value is a range, then pick a random category from with the range
   if(sctg == "01-05"){
-    sample(sprintf("%02s", 1:5), 1)
+    sample(sprintf("%02d", 1:5), 1)
   } else if(sctg == "06-09"){
-    sample(sprintf("%02s", 6:9), 1)
+    sample(sprintf("%02d", 6:9), 1)
   } else if(sctg == "10-14"){
-    sample(sprintf("%02s", 10:14), 1)
+    sample(sprintf("%02d", 10:14), 1)
   } else if(sctg == "15-19"){
-    sample(sprintf("%02s", 15:19), 1)
+    sample(sprintf("%02d", 15:19), 1)
   } else if(sctg == "20-24"){
-    sample(sprintf("%02s", 20:24), 1)
+    sample(sprintf("%02d", 20:24), 1)
   } else if(sctg == "25-30"){
-    sample(sprintf("%02s", 25:30), 1)
+    sample(sprintf("%02d", 25:30), 1)
   } else if(sctg == "31-34"){
-    sample(sprintf("%02s", 31:34), 1)
+    sample(sprintf("%02d", 31:34), 1)
   } else if(sctg == "35-38"){
-    sample(sprintf("%02s", 35:38), 1)
+    sample(sprintf("%02d", 35:38), 1)
   } else if(sctg == "39-99"){
     sample(sprintf("%02s", c("39", "40", "41", "43", "99")), 1)
   } else if(sctg == "00"){
-    sample(sprintf("%02s", c(1:41, 43, "99")), 1)
+    sample(sprintf("%02d", c(1:41, 43, 99)), 1)
   } else {
     sctg
   }

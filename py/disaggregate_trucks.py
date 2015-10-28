@@ -32,10 +32,16 @@ def pick_county(dict_table, sctg, zone):
     :return: the O or D county FIPS code
     """
     # get the relevant county lookup table
-    county = np.random.choice(
-        dict_table[zone][sctg].keys(),
-        p=dict_table[zone][sctg].values())
-    return county
+    try:
+        a = dict_table[zone][sctg]
+    except KeyError:
+        print "Key not found for zone ", zone, " and commodity ", sctg
+        sys.exit()
+    else:
+        county = np.random.choice(
+            dict_table[zone][sctg].keys(),
+            p=dict_table[zone][sctg].values())
+        return county
 
 
 def pick_ienode(dict_table, mode, zone):

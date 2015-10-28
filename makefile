@@ -1,5 +1,5 @@
 # How many cores are available on your computer?
-CORES = 4
+CORES = 24
 
 # What year to simulate? Options: 2006:2013, 2015, 2020, 2025, 2030, 2035, 2040
 SIMYEAR = 2012
@@ -35,7 +35,9 @@ $(SIMFILES): $(SIMULFDIR)/%.csv: $(SCRIPTDIR)/%.R
 
 $(SIMULFDIR)/faf_trucks.csv: data/faf_data.Rdata
 
-$(SIMULFDIR)/make_table.csv $(SIMULFDIR)/use_table.csv: data/cbp_data.Rdata
+$(SIMULFDIR)/use_table.csv: $(SIMULFDIR)/make_table.csv
+
+$(SIMULFDIR)/make_table.csv: data/cbp_data.Rdata
 
 $(SIMULFDIR)/make_table.csv: data_raw/cfs_pums.csv
 
@@ -44,10 +46,10 @@ data/faf_data.Rdata: data_raw/faf4_data.csv R/prep_FAF.R
 	@echo Reading FAF data into R
 	@Rscript R/prep_FAF.R $(SIMYEAR) $(SMALL)
 
-data/cbp_data.Rdata: data_raw/Cbp12co.txt R/prep_CBP.R
+data/cbp_data.Rdata: data_raw/cbp12co.txt R/prep_CBP.R
 	@echo Reading CBP data into R
 	@Rscript R/prep_CBP.R
-	
+
 data/gdp_output.rds: R/prep_BEA.R data_raw/gdp_output.csv
 	@echo Reading BEA data into R
 	@Rscript R/prep_BEA.R
@@ -55,9 +57,9 @@ data/gdp_output.rds: R/prep_BEA.R data_raw/gdp_output.csv
 R/prep_FAF.R: data/gdp_output.rds
 
 # Download and unzip source data from FHWA and Census
-data_raw/Cbp12co.txt: data_raw/cbp12co.zip
+data_raw/cbp12co.txt: data_raw/cbp12co.zip
 	@echo extracting County Business Patterns source data
-	@unzip $< -d $(@d)
+	@unzip $< -d data_raw
 	@touch $@
 
 data_raw/cbp12co.zip:
@@ -68,13 +70,13 @@ data_raw/faf4_data.csv:
 	@echo downloading FAF 4.0 data table
 	@wget -O $@ http://www.rita.dot.gov/bts/sites/rita.dot.gov.bts/files/AdditionalAttachmentFiles/FAF4_0%20data.csv
 	@touch $@
-	
+
 data_raw/cfs_pums.csv: data_raw/cfs_pums.zip
 	@echo extracting CFS PUMS file
 	@unzip $< -d data_raw
 	@mv data_raw/cfs_2012_pumf_csv.txt $@
 	@touch $@
-	
+
 data_raw/cfs_pums.zip:
 	@echo downloading CSF PUMS file
 	@wget -O $@ http://www.census.gov/econ/cfs/2012/cfs_2012_pumf_csv.zip

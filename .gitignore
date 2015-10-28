@@ -39,3 +39,5 @@ data_raw/cfs_pums.csv
 data_raw/cfs_pums.zip
 data/io/makecoefs.rds
 data/io/usecoefs.rds
+data_raw/Cbp12co.txt
+data_raw/faf4_data.csv

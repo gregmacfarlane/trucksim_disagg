@@ -11,8 +11,8 @@ ranges <- read.csv("data_raw/cbp_missingcodes.csv", sep="&",
                    colClasses = c("character", "character", "numeric"))
 CBP <- CBP %>% left_join(., ranges, by = "empflag") %>%
   mutate(emp = ifelse(is.na(empimp), emp, empimp),
-         GEOID = paste(sprintf("%02d", fipstate), # sprintf to pad leading zeros
-                       sprintf("%03d", fipscty), sep="")) %>%
+         GEOID = paste(sprintf("%02s", fipstate), # sprintf to pad leading zeros
+                       sprintf("%03s", fipscty), sep="")) %>%
   filter(fipscty != "999") %>%
   mutate(naics = gsub("[[:punct:]]", "", naics)) %>%
   select(naics, emp, GEOID)

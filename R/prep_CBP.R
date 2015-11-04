@@ -6,13 +6,14 @@ library(readr)
 # Read in the data from the CBP file, impute missing variables, and save as
 # binary format
 cat("Cleaning CBP data\n")
-CBP <- read_csv("data_raw/cbp12co.txt")
+CBP <- read_csv("data_raw/cbp12co.txt") %>%
+  mutate(GEOID = paste0(sprintf("%02d", fipstate), 
+                        sprintf("%03d", fipscty)))
+
 ranges <- read.csv("data_raw/cbp_missingcodes.csv", sep="&",
                    colClasses = c("character", "character", "numeric"))
 CBP <- CBP %>% left_join(., ranges, by = "empflag") %>%
-  mutate(emp = ifelse(is.na(empimp), emp, empimp),
-         GEOID = paste(sprintf("%02s", fipstate), # sprintf to pad leading zeros
-                       sprintf("%03s", fipscty), sep="")) %>%
+  mutate(emp = ifelse(is.na(empimp), emp, empimp)) %>%
   filter(fipscty != "999") %>%
   mutate(naics = gsub("[[:punct:]]", "", naics)) %>%
   select(naics, emp, GEOID)

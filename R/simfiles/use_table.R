@@ -58,6 +58,8 @@ usetable <- rbind_all(use_data_list) %>%
   
 # need to get proportion of commodities made by each industry from make table.
 maketable <- readRDS("data/io/makecoefs.rds") %>%
+  group_by(naics) %>%
+  mutate(makecoef = value / sum(value)) %>%
   rename(make_naics = naics, production = value)
   
 usetable <- usetable %>%

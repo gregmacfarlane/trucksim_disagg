@@ -4,9 +4,10 @@ author: "Gregory Macfarlane"
 date: "November 13, 2015"
 output:
   pdf_document:
-    toc: yes
     fig_caption: yes
     highlight: pygments
+    keep_tex: yes
+    toc: yes
   html_document:
     fig_caption: yes
     highlight: pygments
@@ -17,8 +18,12 @@ output:
 library(ggplot2) 
 library(dplyr, warn.conflicts = FALSE) 
 library(tidyr) 
-library(readr) 
+library(readr)
+library(knitr)
+opts_chunk$set(dev = "tikz")
 ```
+
+\clearpage
 
 # Introduction 
 This document outlines a disaggregation methodology for
@@ -40,9 +45,9 @@ is that these regions are too large to adequately assign flows to highway links
 and thereby study policy or infrastructure alternatives.
 
 Practitioners and academics have developed many different methods for 
-disaggregating these region-to-region flows into county-to-county flows. All 
-methods have strengths and weaknesses; this new method is designed with a few 
-specific goals in mind:
+disaggregating these region-to-region flows into county-to-county or
+region-to-region flows. All methods have strengths and weaknesses; this new
+method is designed with a few specific goals in mind:
 
   - _Simulation-ready_:  Outputs of the framework are discrete, individual plans
   that can be simulated with a transport engine such as MATSim.
@@ -53,11 +58,11 @@ specific goals in mind:
   requires substantial effort but produces only marginal benefit, it should be
   avoided.
   - _Transparency_: The disaggregation code is written clearly in free software
-  (R   and Python), and is available on the open internet and hosted on 
-  [GitHub](https://github.com/gregmacfarlane/trucksim_disagg). Datasets used are
-  clearly referenced or linked to, and are free to the general public. 
-  Constructive comment and contributions are sought and welcome from 
-  all.^[Ideally, with a pull request on GitHub.]
+  (R   and Python), and is available in an public 
+  [GitHub](https://github.com/gregmacfarlane/trucksim_disagg) repository.
+  Datasets that the simulation uses are clearly referenced or linked to, and are
+  free to the general public. Constructive comment and contributions are sought
+  and welcome from all.^[Ideally, with a pull request on GitHub.]
 
 The design paradigm for this new disaggregation methodology involves first 
 _discretizing_ the regional dollar and ton commodity flows into an integer 
@@ -66,31 +71,31 @@ destination for them to travel between. The remainder of this document discusses
 these steps in turn. 
 
 # Discretization 
-Version 3 of the FAF documentation included a 
+The documentation for FAF version 3 included a 
 [methodology](http://faf.ornl.gov/fafweb/Data/Freight_Traffic_Analysis/chap3.htm)
 to convert freight flows to a number of trucks.^[FAF3 Freight Traffic Analysis, 
 [http://faf.ornl.gov/fafweb/Data/Freight_Traffic_Analysis/faf_fta.pdf](http://faf.ornl.gov/fafweb/Data/Freight_Traffic_Analysis/faf_fta.pdf)]
 There are three types of factors included with this methodology:
 
- 1. Table 3.3 contains allocation factors that determine the truck configuration
- (single-unit, combination-semi, etc.) based on the distance traveled.
- 2. Table 3.5 contains empty truck factors that determine the percent of empty
+ 1. Allocation factors that determine the truck configuration (single-unit,
+ combination-semi, etc.) based on the distance traveled (Table 3.3).
+ 2. Empty truck factors that determine the percent of empty
  trucks traveling between two FAF regions based on the configuration and the
- whether the shipment is domestic or a land-border shipment.^[NAFTA allows
- trucks to carry goods across borders, but not necessarily return full; hence, 
- international shipments have a greater percentage of empty trucks.]
- 3. Appendix A contains payload equivalency factors that determine how much of
- each commodity a truck of a given configuration and vehicle type can carry.
-
-Applying these factors to the FAF data results in a decimal number of trucks of 
-each configuration -- empty and full -- traveling between FAF regions in a 
-calendar year. The simulation framework used in the disaggregation step requires
-a discrete number of trucks; as a consequence, we filter out flows less than one
-quarter of a truck load and round up to the nearest whole number.
+ whether the shipment is domestic or a land-border shipment (Table 3.5).^[NAFTA
+ allows trucks to carry goods across borders, but not necessarily return full;
+ hence, international shipments have a greater percentage of empty trucks.]
+ 3. Payload equivalency factors that determine how much of each commodity a
+ truck of a given configuration and vehicle type can carry (Appendix A).
 
 This method is based on 2007 commodity flow survey data processed by Oak Ridge 
 National Laboratory; when an updated methodology based on the 2012 commodity 
 flow survey becomes available the framework will be updated.
+
+Applying these factors to the FAF data results in a decimal number of trucks of 
+each configuration -- empty and full -- traveling between FAF regions in a 
+calendar year. The simulation framework used in the selection step requires
+a discrete number of trucks; as a consequence, we filter out flows less than one
+quarter of a truck load and round up to the nearest whole number.
 
 # Selection 
 The heart of the disaggregation framework is a method by which 
@@ -156,7 +161,7 @@ of the firm making the shipment, the commodity shipped, and the shipment's
 monetary value. From this, an analyst can calculate the inferred probability of 
 workers in a particular industry shipping a dollar's value of a commodity, or 
 the first ratio in the size term. The values of these make coefficients by 
-industry are represented in Figure \label{fig:maketable}.
+industry are represented in Figure \ref{fig:maketable}.
 
 The second ratio in the size term comes from the 2012 county business patterns 
 file. This data contains the count of employees in each industry in each county.
@@ -203,7 +208,7 @@ commodities from industry $A$ in proportion to industry $A$'s production of each
 commodity, a ratio we can calculate from the make coefficients above.^[This 
 assumption has less theoretical support than the efficient production hypothesis
 above.] The resulting ratios are known as _use_ coefficients, and are shown 
-graphically in Figure \ref{usetable}.
+graphically in Figure \ref{fig:usetable}.
 
 ```{r usetable, fig.height=7, fig.width=6.5, fig.cap="Proportion of commodity (SCTG) used by industries.\\label{fig:usetable}", echo = FALSE} 
 usetable <- readRDS("../../trucksim_disagg/data/io/usecoefs.rds") %>% 
@@ -241,7 +246,8 @@ $$\frac{\beta X_a}{\sum_{b \in A} {\beta X_b}}$$
 
 
 where $\beta$ are the coefficients on the make or use end of the trip and $X_a$ 
-are the zone's socioeconomc variables. 
+are the zone's socioeconomic variables. The coefficients are taken from the
+North Carolina statewide model.
 
 ```{r coef_local, echo = FALSE, message = FALSE, fig.height=8, fig.width=6.5, fig.cap="Local make and use coefficients.\\label{fig:local}"} 
 ml <- read_csv("../data/io/make_local.csv") %>% 
@@ -280,7 +286,9 @@ U.S. Army Corps of Engineers, and the Customs and Border Patrol, respectively.
 
 The airports database has the location of every airport in United States and its
 territories. Not all of these airports handle freight, or indeed are equipped to
-do so. The size term for airports is based on the 2006-2010
+do so. The size term for airports is based on the 2006-2010 International Air
+Passenger and Freight Statistics Report published by the U.S. Department of
+Transportation.^[https://www.transportation.gov/sites/dot.dev/files/docs/2006-2010%20Departures.txt]
 
 The seaports database includes the total volume (weight) of imports and exports 
 handled in 2012. Because these numbers are comparable for the vast majority of 

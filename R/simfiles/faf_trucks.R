@@ -131,9 +131,7 @@ simpleTruckloadEquivalencies <- function(flow_records, truck_factors){
 
 # TEST WITH THE PUBLISHED EXAMPLE =============================================
 # Recreate the conversion laid out in Table 3-6 of the FAF3 Freight Traffic
-# Analyis report. I added the term `crossing_type` because I think the crossing
-# type is determined by adjacency and not purely by import/export, despite the
-# horrendous terminology.
+# Analyis report.
 # table36 <- data.frame(dms_orig=49, dms_dest=41, sctg="03", tons=1519.150,
 #                      value=1373.96, distance="(100,200]",
 #                      crossing_type = "land_border",

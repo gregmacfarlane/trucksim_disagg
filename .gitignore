@@ -41,3 +41,6 @@ data/io/makecoefs.rds
 data/io/usecoefs.rds
 data_raw/Cbp12co.txt
 data_raw/faf4_data.csv
+docs/report_files/figure-latex
+docs/report-tikzDictionary
+docs/report.tex

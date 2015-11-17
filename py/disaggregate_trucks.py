@@ -206,7 +206,7 @@ class TruckPlan(object):
         et.SubElement(plan, "act",
                       attrib={'type': "dummy",
                               'x': get_coord(self.origin, 'x'),
-                              'y': get_coord(self.origin, 'x'),
+                              'y': get_coord(self.origin, 'y'),
                               'end_time': str(self.time)})
         et.SubElement(plan, "leg", attrib={'mode': "car"})
         et.SubElement(plan, "act",

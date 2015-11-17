@@ -63,13 +63,11 @@ cfs <- read_csv(
     weight = WGT_FACTOR
   )
   
-# The make coefficient is the proportion of industry output consisting of each
-# good.
-
+# The make coefficient is the proportion of a commodity produced by each industry.
 maketable <- cfs %>%
   group_by(naics, sctg) %>%
   summarise(value = sum(value * weight)) %>%
-  group_by(naics) %>%
+  group_by(sctg) %>%
   mutate(makecoef = value / sum(value))
 
 # you will need the make coefficients to consruct the use table.

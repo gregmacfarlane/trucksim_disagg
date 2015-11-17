@@ -217,7 +217,7 @@ class TruckPlan(object):
 
 if __name__ == "__main__":
     # sampling rate to use in the simulation
-    SAMPLE_RATE = 0.05
+    SAMPLE_RATE = 0.03
 
     # Read in the I/O tables and convert them to dictionaries.
     print "  Reading input tables"

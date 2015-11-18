@@ -7,8 +7,7 @@ library(readr)
 # binary format
 cat("Cleaning CBP data\n")
 CBP <- read_csv("data_raw/cbp12co.txt") %>%
-  mutate(GEOID = paste0(sprintf("%02d", fipstate), 
-                        sprintf("%03d", fipscty)))
+  mutate(GEOID = paste0(fipstate, fipscty))
 
 ranges <- read.csv("data_raw/cbp_missingcodes.csv", sep="&",
                    colClasses = c("character", "character", "numeric"))

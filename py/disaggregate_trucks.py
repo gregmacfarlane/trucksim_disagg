@@ -63,7 +63,7 @@ def get_start_day():
     :return: a random day of the week. For now all days are the same,
     but we don't have to make it that way. We have a one-week simulation
     """
-    return np.random.randint(0, 6)
+    return np.random.randint(0, NUMBER_DAYS - 1)
 
 
 def get_departure_time():

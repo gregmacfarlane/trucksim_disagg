@@ -69,8 +69,10 @@ calcTruckloadEquivalencies <- function(flow_records, truck_factors){
       # we obviously want the sum of the trucks and the empty trucks.
       trucks = sum(trucks), empty_trucks = sum(empty_trucks), 
       # but we also want to keep the relevant fields from the original data.
-      # Because these are constant, we'll just take the first record in each group.
-      dms_orig = dms_orig[1], dms_dest = dms_dest[1], sctg = sctg[1]
+      # Because these are constant, we'll just take the first record in each
+      # group.
+      dms_orig = dms_orig[1], dms_dest = dms_dest[1], sctg = sctg[1],
+      fr_inmode = fr_inmode[1], fr_outmode = fr_outmode[1]
     ) %>%
     gather(type, trucks, trucks:empty_trucks) %>%
     mutate(

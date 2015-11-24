@@ -2,13 +2,11 @@
 # ==============================================================
 # This script calculates the number of trucks shipping a given tonnage of frieght
 # between two zones takes. This is based on chapter 3 of the FAF manual.
-
-require(dplyr, warn.conflicts = TRUE)
-require(tidyr)
-require(maptools)
-require(spdep)
-require(parallel)
-require(readr)
+library(dplyr, warn.conflicts = FALSE)
+library(tidyr)
+library(readr)
+suppressPackageStartupMessages(library(maptools, quietly = TRUE))
+library(parallel)
 
 # The user should requst the number of cores with the call.
 args <-commandArgs(TRUE)
@@ -98,23 +96,31 @@ calcTruckloadEquivalencies <- function(flow_records, truck_factors){
 # there are more empty trucks flowing between the zones. We can determine both
 # sets of information from the FAF zones shapefile.
 message("Calculating distance and adjacency\n")
-WGS84 <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
-FAFzones <- readShapePoly("data_raw/shapefiles/faf4zone.shp", proj4string = WGS84)
+WGS84 <- sp::CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
+FAFzones <- maptools::readShapePoly(
+  "data_raw/shapefiles/faf4zone.shp", proj4string = WGS84
+)
 F4Z <- FAFzones@data %>%
   transmute(F4Z = sprintf("%03s", as.character(F4Z))) %>%
   .$F4Z
 
 # Calculate Great Circle distance between every zone, and reshape into a lookup
 # table.
-distmatrix <- spDists(FAFzones, longlat = TRUE)
-colnames(distmatrix) <- rownames(distmatrix) <- F4Z
-distmatrix <- melt(distmatrix, value.name = "distance", as.is = TRUE) %>%
-  mutate(dms_orig = Var1, dms_dest = Var2,
-         distance = cut(distance * 0.621371, # spDists returns kilometers
-                        breaks = c(0, 50, 100, 200, 500, Inf),
-                        include.lowest = TRUE)) %>%
-  select(dms_orig, dms_dest, distance) %>%
-  tbl_df()
+distmatrix <- sp::spDists(FAFzones, longlat = TRUE) %>%
+  as.data.frame() %>%
+  as_data_frame() %>%
+  mutate(dms_orig = F4Z)
+
+names(distmatrix) <- c(F4Z, "dms_orig")
+
+distmatrix <- distmatrix %>%
+  gather(dms_dest, distance, -dms_orig) %>%
+  mutate(
+    distance = cut(distance * 0.621371, # spDists returns km, factors in mi
+                   breaks = c(0, 50, 100, 200, 500, Inf),
+                   include.lowest = TRUE),
+    dms_dest = as.character(dms_dest)
+  )
   
 
 # APPLY FACTORS TO FAF DATA ===================================================

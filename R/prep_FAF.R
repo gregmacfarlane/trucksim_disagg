@@ -42,8 +42,8 @@ FAF <- read_csv(
     fr_dest = col_character(),
     fr_inmode = col_character(),
     fr_outmode = col_character(),
-    sctg2 = col_numeric(),
-    trade_type = col_numeric()
+    sctg2 = col_number(),
+    trade_type = col_number()
   )
 ) 
 

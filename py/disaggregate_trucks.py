@@ -1,11 +1,10 @@
 __author__ = 'Greg'
 
 import pandas as pd
-import gzip
 import numpy as np
-import lxml.etree as et
 import itertools
 import multiprocessing as mp
+import csv
 
 
 def recur_dictify(frame):
@@ -63,7 +62,10 @@ def get_start_day():
     :return: a random day of the week. For now all days are the same,
     but we don't have to make it that way. We have a one-week simulation
     """
-    return np.random.randint(0, NUMBER_DAYS - 1)
+    if NUMBER_DAYS == 1:
+        return 0
+    else:
+        return np.random.randint(0, NUMBER_DAYS - 1)
 
 
 def get_departure_time():
@@ -105,6 +107,38 @@ def make_plans(df):
         l += [TruckPlan(row) for _ in range(trucks)]
     return l
 
+def write_output(list, file, type):
+    """Write truck plans to file
+    
+    Args:
+        list: a list of objects of class TruckPlan
+        file: a path to the output file
+        type: which type of output to produce
+        
+    Returns:
+        Writes to a file. If type = `csv` then the result is a csv with the
+        origin, destination, number of trucks by sctg code. Otherwise, writes to
+        a MATSim plans file.
+     """
+     
+    if type == "csv":
+        with open(file, 'w') as f:
+            columns = ['id', 'origin', 'destination', 'config', 'sctg']
+            writer = csv.DictWriter(f, columns)
+            writer.writeheader()
+            for truck in list:
+                writer.writerow(truck.write_detailed_plan())
+    else:
+        # Create the element tree container
+        population = et.Element("population")
+        pop_file = et.ElementTree(population)
+        
+        for truck in list:
+            truck.write_plan(population)
+
+        with gzip.open(file, 'w', compresslevel=4) as f:
+            f.write("""<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v5.dtd">""")
+            pop_file.write(f, pretty_print=True)
 
 class TruckPlan(object):
     """Critical information for the truck plan
@@ -213,12 +247,21 @@ class TruckPlan(object):
                       attrib={'type': "dummy",
                               'x': get_coord(self.destination, 'x'),
                               'y': get_coord(self.destination, 'y')})
-
+                              
+    def write_detailed_plan(self):
+        row = {'id': self.id,
+               'origin': self.origin,
+               'destination': self.destination,
+               'config': self.type,
+               'sctg': self.sctg}
+        return row
 
 if __name__ == "__main__":
     # sampling rate to use in the simulation
-    SAMPLE_RATE = 0.1
-    NUMBER_DAYS = 3
+    SAMPLE_RATE = 1
+    NUMBER_DAYS = 1
+    output_file = "test.csv"
+    output_type = "csv"
 
     # Read in the I/O tables and convert them to dictionaries.
     print "  Reading input tables"
@@ -257,7 +300,8 @@ if __name__ == "__main__":
     faf_trucks = pd.read_csv(
         "./data/simfiles/faf_trucks.csv",
         dtype={'dms_orig': np.str, 'dms_dest': np.str, 'sctg': np.str,
-               'trucks': np.int, 'fr_inmode': np.str, 'fr_outmode': np.str}
+               'trucks': np.int, 'fr_inmode': np.str, 'fr_outmode': np.str},
+        nrows = 100
     )
 
     print "  Maximum of", sum(faf_trucks['trucks']), "trucks."
@@ -268,7 +312,7 @@ if __name__ == "__main__":
     # n_cores equal parts and do the origin and destination assignment off on
     # all the child cores. When we return all of the TruckPlans objects, we can
     # create their xml nodes and give them new ids.
-    n_cores = mp.cpu_count() - 1  # leave yourself one core
+    n_cores = mp.cpu_count()
     print "  Creating truck plans with ", n_cores, " separate processes"
     p = mp.Pool(processes=n_cores)
     split_dfs = np.array_split(faf_trucks, n_cores)
@@ -278,19 +322,8 @@ if __name__ == "__main__":
     l = [a for L in pool_results for a in L]   # put all TPlans in same list
     print "  Created plans for", len(l), "trucks."
 
-    # Create the element tree container
-    population = et.Element("population")
-    pop_file = et.ElementTree(population)
-
-    # make new ids and write each truck's plan into the population tree
+    # make new ids and write each truck's plan to a CSV
     for i, truck in itertools.izip(range(len(l)), l):
         truck.set_id(i)
 
-    for truck in l:
-        truck.write_plan(population)
-
-    with gzip.open('population.xml.gz', 'w', compresslevel=4) as f:
-        f.write("""<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v5.dtd">
-""")
-        pop_file.write(f, pretty_print=True)
+    write_output(l, output_file, output_type)

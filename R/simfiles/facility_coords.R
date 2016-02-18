@@ -10,18 +10,15 @@ message("Making table of facility coordinates.\n")
 WGS84 <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 LCC <- CRS("+init=epsg:2818")
 
-counties <- readShapePoly("data_raw/shapefiles/cnty2faf.shp",
+counties_poly <- readShapePoly("data_raw/shapefiles/cnty2faf.shp",
                           proj4string = WGS84) %>%
   spTransform(LCC)
 
-county_points <- counties %>%
-  gCentroid(., byid = TRUE)
-
-counties <- counties@data %>%
+counties <- counties_poly@data %>%
   transmute(
     name = as.character(ANSI_ST_CO),
-    x = coordinates(counties)[, 1],
-    y = coordinates(counties)[, 2]
+    x = coordinates(counties_poly)[, 1],
+    y = coordinates(counties_poly)[, 2]
   )
 
 seaports <- readShapePoints("./data_raw/shapefiles/ntad/ports_major.shp",
@@ -53,9 +50,18 @@ crossings <- crossings@data %>%
   transmute(
     name = as.character(PortCode),
     x = coordinates(crossings)[, 1],
-    y = coordinates(crossings)[, 2]
-  )
+    y = coordinates(crossings)[, 2],
+    trucks = Trucks
+  ) %>%
+  filter(trucks > 0) %>% select(-trucks)
 
 points <- rbind_list(counties, airports, seaports, crossings)
+
+points$geoid <- over(
+  SpatialPoints(coords = cbind(points$x, points$y), proj4string = LCC),
+  counties_poly
+) %>%
+  mutate(geoid = as.character(ANSI_ST_CO)) %>%
+  .$geoid
 
 write.csv(points, file = "data/simfiles/facility_coords.csv", row.names = FALSE)

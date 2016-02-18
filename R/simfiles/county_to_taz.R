@@ -30,7 +30,7 @@ se <- taz_shp@data %>%
   transmute(
     taz = MODEL_TAZ,
     region = REGION,  # regions, including outside the halo
-    county = ifelse(is.na(COUNTYFIPS), NA,  
+    county = ifelse(is.na(COUNTYFIPS), NA,
                     paste(STATEFIPS, sprintf("%03d", COUNTYFIPS), sep = "")),
     ind = IND_11,
     hi_ind = HI_IND_11,
@@ -40,32 +40,32 @@ se <- taz_shp@data %>%
     serv = SERV_11,
     gov = GOV_11,
     edu = EDU_11,
-    hosp = HOSP_11 
+    hosp = HOSP_11
   ) %>%
   gather(industry, count, ind:hosp)
 
 # Import/Export Nodes
-# Trucks destined for an airport or seaport should be directed to the 
+# Trucks destined for an airport or seaport should be directed to the
 # TAZ that includes the port directly.
 ie_coords$taz <- over(
-  SpatialPoints(cbind(ie_coords$x, ie_coords$y), 
+  SpatialPoints(cbind(ie_coords$x, ie_coords$y),
                 proj4string = CRS("+init=epsg:2818")),
   taz_shp
 )$MODEL_TAZ
 
-ie <- ie_coords %>% 
+ie <- ie_coords %>%
   filter(!is.na(taz)) %>%
-  select(name, taz) 
+  select(name, taz)
 
 
 # Zones outside the Halo ===========
-# Zones inside of North Carolina and the Halo are generally smaller than a 
+# Zones inside of North Carolina and the Halo are generally smaller than a
 # single county, and will need a split. Zones outside of the halo will instead
 # get a p = 1 assigning them to the larger zone that contains one or more counties.
 
 # which zone do the points fall in?
 county_coords$taz <- over(
-  SpatialPoints(cbind(county_coords$x, county_coords$y), 
+  SpatialPoints(cbind(county_coords$x, county_coords$y),
                 proj4string = CRS("+init=epsg:2818")),
   taz_shp[taz_shp$REGION == 5, ]  # only need this outside Halo.
 )$MODEL_TAZ
@@ -74,7 +74,7 @@ outside_counties <- county_coords %>%
   select(name, taz)
 
 # Zones inside the Halo ==========
-# there are two types of points inside the halo: 
+# there are two types of points inside the halo:
 #  - standard counties that need to be disaggregated with se data
 #  - import/export nodes that need to be assigned to an existing TAZ
 
@@ -82,7 +82,7 @@ se_halo <- se %>%
   filter(region != 5)
   
 # Make term --------
-make_coefs <- read_csv("data/io/make_local.csv") %>%
+make_coefs <- read_csv("data_raw/io/make_local.csv") %>%
   
   # clean up table
   gather(sctg, value, -Industry) %>%
@@ -105,7 +105,7 @@ make_coefs <- read_csv("data/io/make_local.csv") %>%
   mutate(p = value / sum(value))
 
 # Use term -------
-use_coefs <- read_csv("data/io/use_local.csv") %>%
+use_coefs <- read_csv("data_raw/io/use_local.csv") %>%
   # clean up table
   gather(sctg, value, -Industry) %>%
   mutate(

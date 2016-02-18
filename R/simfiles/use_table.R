@@ -23,7 +23,7 @@ uri <- paste(
 response <- httr::content(httr::GET(uri), type = "text/xml")
 
 # collect into parse into a useable dataframe
-use_data_xmllist <- getNodeSet(response, "//Results/Data")
+use_data_xmllist <- getNodeSet(xmlParse(response), "//Results/Data")
 use_data_list <- lapply(use_data_xmllist, function(x){
   data.frame(as.list(xmlAttrs(x)), stringsAsFactors = FALSE)
 })

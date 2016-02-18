@@ -107,6 +107,38 @@ def make_plans(df):
         l += [TruckPlan(row) for _ in range(trucks)]
     return l
 
+def write_output(list, file, type):
+    """Write truck plans to file
+    
+    Args:
+        list: a list of objects of class TruckPlan
+        file: a path to the output file
+        type: which type of output to produce
+        
+    Returns:
+        Writes to a file. If type = `csv` then the result is a csv with the
+        origin, destination, number of trucks by sctg code. Otherwise, writes to
+        a MATSim plans file.
+     """
+     
+    if output = "csv":
+        with open(file, 'w') as f:
+            columns = ['id', 'origin', 'destination', 'config', 'sctg']
+            writer = csv.DictWriter(f, columns)
+            writer.writeheader()
+            for truck in list:
+                writer.writerow(truck.write_detailed_plan())
+    else:
+        # Create the element tree container
+        population = et.Element("population")
+        pop_file = et.ElementTree(population)
+        
+        for truck in list:
+            truck.write_plan(population)
+
+        with gzip.open(file, 'w', compresslevel=4) as f:
+            f.write("""<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v5.dtd">""")
+            pop_file.write(f, pretty_print=True)
 
 class TruckPlan(object):
     """Critical information for the truck plan
@@ -228,6 +260,8 @@ if __name__ == "__main__":
     # sampling rate to use in the simulation
     SAMPLE_RATE = 1
     NUMBER_DAYS = 1
+    output_file = "test.csv"
+    output_type = "csv"
 
     # Read in the I/O tables and convert them to dictionaries.
     print "  Reading input tables"
@@ -291,9 +325,7 @@ if __name__ == "__main__":
     for i, truck in itertools.izip(range(len(l)), l):
         truck.set_id(i)
 
-    with open('population.csv', 'w') as f:
-        columns = ['id', 'origin', 'destination', 'config', 'sctg']
-        writer = csv.DictWriter(f, columns)
-        writer.writeheader()
-        for truck in l:
-            writer.writerow(truck.write_detailed_plan())
+    write_output(l, output_file, output_type)
+
+
+       

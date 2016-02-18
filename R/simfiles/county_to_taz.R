@@ -11,9 +11,9 @@ library(foreign)
 ie_nodes <- read_csv("data/simfiles/ie_nodes.csv")
 counties <- read.dbf("data_raw/shapefiles/cnty2faf.dbf")
 
-faf_coords <- read_csv("data/simfiles/facility_coords.csv", col_types = "cnn")
+faf_coords <- read_csv("data/simfiles/facility_coords.csv", col_types = "cnnc")
 
-county_coords <- filter(faf_coords, name %in% counties$GEOID)
+county_coords <- filter(faf_coords, name %in% counties$ANSI_ST_CO)
 ie_coords <- filter(faf_coords, name %in% ie_nodes$name)
   
   

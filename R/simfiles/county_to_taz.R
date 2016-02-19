@@ -11,7 +11,7 @@ library(foreign)
 ie_nodes <- read_csv("data/simfiles/ie_nodes.csv")
 counties <- read.dbf("data_raw/shapefiles/cnty2faf.dbf")
 
-faf_coords <- read_csv("data/simfiles/facility_coords.csv", col_types = "cnnc")
+faf_coords <- read_csv("data/simfiles/facility_coords.csv", col_types = "cddc")
 
 county_coords <- filter(faf_coords, name %in% counties$ANSI_ST_CO)
 ie_coords <- filter(faf_coords, name %in% ie_nodes$name)
@@ -71,7 +71,9 @@ county_coords$taz <- over(
 )$MODEL_TAZ
 
 outside_counties <- county_coords %>%
-  select(name, taz)
+  select(name, taz) %>%
+  filter(!is.na(taz))
+
 
 # Zones inside the Halo ==========
 # there are two types of points inside the halo:

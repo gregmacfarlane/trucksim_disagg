@@ -61,20 +61,25 @@ def pick_taz(county_dict, sctg, point) :
     :param point: The point (either a county or an import/export node) to which the simulation has assigned the shipment.
     :return: the TAZ to which the truck is destined
     """
-    if point in COUNTY_TO_TAZ:
-        taz = COUNTY_TO_TAZ[point]
+    # If the global variable is set to counties only, then just return the original
+    # input
+    if region == "counties":
+        return(point)
     else:
-        try:
-            probs = county_dict[point][sctg].values()
-            probs /= sum(probs)   # renormalize probability vector
-            taz = np.random.choice(
-                county_dict[point][sctg].keys(),
-                p=probs
-            )
-        except KeyError:
-            # if it doesn't exist in either dictionary, return NA
-            taz = "NA"
-    return taz
+        if point in COUNTY_TO_TAZ:
+            taz = COUNTY_TO_TAZ[point]
+        else:
+            try:
+                probs = county_dict[point][sctg].values()
+                probs /= sum(probs)   # renormalize probability vector
+                taz = np.random.choice(
+                    county_dict[point][sctg].keys(),
+                    p=probs
+                )
+            except KeyError:
+                # if it doesn't exist in either dictionary, return NA
+                taz = "NA"
+        return taz
 
 def get_start_day():
     """
@@ -223,10 +228,10 @@ class TruckPlan(object):
             # Is it going to states on the west coast?
             if self.destination in west_coast_f3z:
                 # I-5 at the Washington/British Columbia border
-                self.origin = '3004'
+                self.origin = pick_taz(MAKE_LOCAL, self.sctg, '3004')
             else:
                 # I-15 at the Montana/Alberta border
-                self.origin = '3310'
+                self.origin = pick_taz(MAKE_LOCAL, self.sctg, '3310')
         else:
             self.origin = pick_taz(
               MAKE_LOCAL, self.sctg,
@@ -241,10 +246,10 @@ class TruckPlan(object):
             # the state
             if self.origin[:2] in west_coast_states:
                 # I-5 at the Washington/British Columbia border
-                self.destination = '3004'
+                self.destination = pick_taz(USE_LOCAL, self.sctg, "3004")
             else:
                 # I-15 at the Montana/Alberta border
-                self.destination = '3310'
+                self.destination = pick_taz(USE_LOCAL, self.sctg, "3310")
         else:
             self.destination = pick_taz(
               USE_LOCAL, self.sctg,
@@ -286,6 +291,7 @@ if __name__ == "__main__":
     NUMBER_DAYS = 1
     output_file = "test.csv"
     output_type = "csv"
+    region = "taz"
 
     # Read in the I/O tables and convert them to dictionaries.
     print "  Reading input tables"
@@ -299,7 +305,7 @@ if __name__ == "__main__":
         dtype={'sctg': np.str, 'F4Z': np.str, 'name': np.str}
     ))
 
-    # County to NCSTM tables
+    # If we are sending it to a lower level than counties
     MAKE_LOCAL = recur_dictify(pd.read_csv(
         "./data/simfiles/make_local.csv",
         dtype={'county': np.str, 'sctg': np.str, 'taz': np.str}
@@ -341,8 +347,7 @@ if __name__ == "__main__":
     faf_trucks = pd.read_csv(
         "./data/simfiles/faf_trucks.csv",
         dtype={'dms_orig': np.str, 'dms_dest': np.str, 'sctg': np.str,
-               'trucks': np.int, 'fr_inmode': np.str, 'fr_outmode': np.str},
-        nrows = 100
+               'trucks': np.int, 'fr_inmode': np.str, 'fr_outmode': np.str}
     )
 
     print "  Maximum of", sum(faf_trucks['trucks']), "trucks."

@@ -15,7 +15,7 @@ sum_to_taz <- function(trucks){
     
     # determine if truck is MU or SU
     mutate(
-      class = ifelse(grepl("SU", type), "SU", "MU")
+      class = ifelse(grepl("SU", config), "SU", "MU")
     ) %>%
     
     # Add up to i, j, by class
@@ -33,8 +33,10 @@ library(dplyr)
 library(tidyr)
 library(readr)
 
-trucks <- read_csv("population.csv")
+trucks <- read_csv("county_plans.csv", col_types = "ccccc")  %>%
+    # determine if truck is MU or SU
+    # Add up to i, j, by class
+    group_by(origin, destination, sctg) %>%
+    summarise(n = n()) 
 
-truck_table <- sum_to_taz(trucks)
-
-write_csv(truck_table, "trip_table.csv")
+write_csv(trucks, "county_od_sctg.csv")

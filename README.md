@@ -1,16 +1,16 @@
 # trucksim_disagg
-A disaggregation of the FAF3 freight flows based on economic data.
+A disaggregation of the FAF4 freight flows based on economic data.
 
 This project contains scripts to disaggregate the Freight Analysis Framework from aggregate flows between FAF regions to discrete numbers of trucks traveling between specific geographic points. The output of this code is a **plans** file that MATSim can read in a simulation.
 
-This simulation is operated by a `makefile`. A user can execute the disaggregation process by calling 
+This simulation is operated by a `makefile`. A user can execute the disaggregation process by calling
 
     make all
 
-On a command line. If you are on Windows computer, you may need to install `GNU Make` manually. 
+On a command line. If you are on Windows computer, you may need to install `GNU Make` manually.
 
 #### Data Preparation
-`make sourcedata` will if necessary, download the FAF 3.5 data and the CBP data directly from the FHWA/Census Bureau servers, extract the compressed data tables, and clean them for further analysis.
+`make sourcedata` will if necessary, download the FAF 4.0 data and the CBP data directly from the FHWA and Census Bureau servers, extract the compressed data tables, and clean them for further analysis.
 
 There are two variables in the `makefile` that the user should set:
 
@@ -18,7 +18,7 @@ There are two variables in the `makefile` that the user should set:
   - `SMALL` boolean; `TRUE` will only disaggregate trucks going to or coming from Raleigh, North Carolina. `FALSE` will disaggregate the entire FAF dataset.
 
 
-#### Discrete Trucks	
+#### Discrete Trucks
 `R/simdata/faf_trucks.R` converts the FAF commodity flows to a number of individual trucks, including empty trucks, flowing between FAF regions using the methodology and factors supplied in Chapter 3 of the FAF documentation. To make this step run faster, we use the `parallel` library for R; the user should set the `CORES` variable to the number of cores they have available.
 
 As a note, the `parallel` library is not available for Windows. We have not tested if setting cores to `1` will allow the code to execute on a Windows computer.
@@ -28,7 +28,7 @@ The trucks in the simulation choose a random point within their origin or destin
 
 Imports and exports are also assigned to port, airport, or border crossing nodes as appropriate.
 
-Once the probability tables are available, `py/disaggregate_trucks.py` selects the random origins and destinations and writes the plans file. The simulation draws a random departure time for each truck, but only writes plans for trucks that depart in the first week of the simulation.
+Once the probability tables are available, `py/disaggregate_trucks.py` selects the random origins and destinations and writes the plans file. The simulation draws a random departure time for each truck, but only writes plans for trucks that depart in the simulation time frame.
 
 ### Use
 This software is distributed without license or claim. We request that applications and derivative work cite this as:

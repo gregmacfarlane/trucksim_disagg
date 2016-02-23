@@ -1,0 +1,208 @@
+---
+title: "Comparison between Provisional and CFS 2012 Data"
+author: "Parsons Brinckerhoff"
+date: "October 14, 2015"
+output: html_document
+---
+
+```{r setup}
+library(knitr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(tidyr)
+```
+
+Version 4.0 of the Freight Analysis Framework --- based on the 2012 Commodity
+Flow Survey and Economic Census --- was released last night. As of right now,
+only the regional flows by commodity and mode for the base year are available.
+
+There are many more things we need to have from the FAF besides these flows (for
+instance, geographical definitions of the regions). However, for the first time
+we can compare the "real" 2012 flows to what we have been including in our models.
+
+** The results are not pretty.**
+
+I downloaded the new FAF 4 dataset and aggregated the flows to the state level, to
+account for possible changes in zonal definitions. I also applied two different
+interpolation methodologies to the FAF 3.5:
+
+  - `gdp` I used industry-level gross product information from the Bureau of Economic Analysis to extrapolate goods production from 2007 to 2012.
+  - `lin` I linearly interpolated the 2007 values and 2015 forecasts to calculate a 2012 estimate.
+
+```{r load_4, echo = FALSE}
+faf4 <- read_csv(
+  "../data_raw/faf4_data.csv", 
+  col_types = list(
+    fr_orig = col_character(),
+    dms_orig = col_character(),
+    dms_dest = col_character(),
+    fr_dest = col_character(),
+    fr_inmode = col_character(),
+    fr_outmode = col_character(),
+    sctg2 = col_character(),
+    trade_type = col_numeric()
+  )
+) %>% 
+  # only trucks
+  # aggregate to state
+  mutate(
+    st_orig = substr(dms_orig, 1, 2),
+    st_dest = substr(dms_dest, 1, 2),
+    sctg = substr(sctg2, 1, 1)
+  ) %>%
+  filter(sctg != "9") %>%
+  group_by(st_orig, st_dest, sctg) %>%
+  summarise(
+    tons_faf4 = sum(tons_2012, na.rm = TRUE),
+    value_faf4 = sum(value_2012, na.rm = TRUE)
+  ) %>%
+  gather(var, flow, tons_faf4:value_faf4) %>%
+  separate(var, c("type", "data"))
+```
+
+```{r load_35, echo = FALSE}
+# read in historical gdp data
+gdp <- readRDS("../data/gdp_output.rds") %>%
+  filter(data_year == 2012) %>%
+  rename(sctg2 = sctg)
+
+# function to linearly interpolate
+interpolate <- function(y0, y1, year){
+  y <- y0 + (y1 - y0) * ( (year - 2007)/(2015 - 2007) )
+  return(y)
+}
+
+faf35 <- read_csv(
+  "../data_raw/faf35_data.csv", 
+  col_types = list(
+    fr_orig = col_character(),
+    dms_orig = col_character(),
+    dms_dest = col_character(),
+    fr_dest = col_character(),
+    fr_inmode = col_character(),
+    fr_outmode = col_character(),
+    sctg2 = col_character(),
+    trade_type = col_numeric()
+  )
+) %>%
+  select(dms_orig, dms_dest, sctg2, 
+         value_2007, tons_2007, value_2015, tons_2015 ) %>%
+  left_join(gdp) %>%
+
+  # scale value and tons by gdp factor
+  mutate(
+    value_gdp = value_2007 * gdp,
+    tons_gdp = tons_2007 * gdp,
+    value_lin = interpolate(value_2007, value_2015, 2012),
+    tons_lin = interpolate(tons_2007, tons_2015, 2012)
+  ) %>%
+  mutate(
+    st_orig = substr(dms_orig, 1, 2),
+    st_dest = substr(dms_dest, 1, 2),
+    sctg = substr(sctg2, 1, 1)
+  ) %>%
+  filter(sctg != "9") %>%
+  group_by(st_orig, st_dest, sctg) %>%
+  summarise_each(funs(sum), value_gdp:tons_lin) %>%
+  gather(var, flow, value_gdp:tons_lin) %>%
+  separate(var, c("type", "data"))
+```
+
+In general, the two datasets are compatible with each other. Field names did not 
+change, though the mode codes or the modes used seem to have changed. For this
+reason, I look at freight moved by all modes. The table below shows twenty random 
+state-to-state commodity flows from the combined dataset.
+
+```{r joined, results = "asis"}
+faf <- rbind_list(faf35, faf4) %>%
+  spread(data, flow, fill = 0) 
+
+kable(sample_n(faf, 10), caption = "Sample", digits = 2)
+```
+
+
+# Error Assessment
+
+## Total Flows
+
+The previous FAF 3.5 was based on the 2007 commodity flow survey and then
+forecasted based on economic projections that did not include the recession from
+2008-2009. Unsurprisingly, total tonnage of freight is substantially (around
+20%) higher in the interpolated FAF 3.5 than in the FAF 4.0. However, the total 
+value of this freight is only off by about 3.5%; this may in part be explained by
+the near-zero inflation rates that have persisted through the recession.
+
+```{r totals, results='asis'}
+faf %>%
+  group_by(type) %>%
+  summarise_each(funs(sum), faf4:lin) %>%
+  mutate(
+    gdp_error = (gdp - faf4) / faf4 * 100,
+    lin_error = (lin - faf4) / faf4 * 100
+  ) %>%
+  kable(caption = "Total FAF 2012 Flows", digits = 3)
+```
+
+If we look at the totals by 1-digit commodity code, then some patterns begin to 
+emerge. Interpolating FAF 3.5 leads to a substantial overprediction in all
+goods except for a mild underprediction in raw minerals (sctg 1...). However, the
+total value of the goods shipped was fairly accurate in the interpolation with
+two exceptions: an over-prediction in the value of manufactured goods (sctg 3...)
+and a substantial underprediction in the value of raw minerals. All of these
+observations can be explained by a loss of consumer demand (from the recession)
+coupled with an energy boom.
+
+```{r totals_sctg, results='asis'}
+faf %>%
+  group_by(type, sctg) %>%
+  summarise_each(funs(sum), faf4:lin) %>%
+  mutate(
+    gdp_error = (gdp - faf4) / faf4 * 100,
+    lin_error = (lin - faf4) / faf4 * 100
+  ) %>%
+  kable(caption = "Total FAF 2012 Flows by SCTG", digits = 3)
+```
+
+## State-to-State Flow Comparison
+
+The error between FAF 4 and FAF 3.5 interpolations is not uniform for all
+state-to-state pairs. The figure below shows a plot of the interpolations
+for tons and value against the observed 2012 volume. It seems as though a major
+source of error in the forecasts is optimism about flows that are near zero in
+2012. Perhaps these were near zero in 2007 as well, but they were forecast for 
+positive growth. Or alternatively, the recession caused small flows in 2007 to 
+shut down completely. 
+
+
+```{r error, fig.cap="Overall error in state-level flow prediction.", message=FALSE}
+faf_p <- faf %>%
+  gather(forecast, flow, gdp:lin) 
+
+p <- ggplot(faf_p, aes(x = faf4 + 0.001, y = flow + 0.001)) +
+  facet_grid(type ~ forecast) +
+  scale_x_log10() + scale_y_log10() +
+  xlab("FAF 4 Observed") + ylab("FAF 3.5 Interpolated") +
+  theme_bw() +
+  geom_abline(slope = 1, color = "grey")
+
+p + geom_point(alpha = 0.2) + geom_smooth()
+```
+
+This is largely borne out in the commodity-level analysis below, except that the
+problem is most pronounced with the raw minerals.
+
+
+```{r error_sctg, fig.cap="Error in state-level flow prediction by SCTG."}
+p + geom_point(aes(color = sctg), alpha = 0.2) + 
+  geom_smooth(aes(color = sctg))
+```
+
+Put another way: FAF 3.5 interpolations of state-to-state flows seem adequate for 
+large flows, but substantially over-predict small ones, especially flows relating 
+to raw minerals. There are enough small flows to substantially affect the total
+volume of trucks on the road.
+
+# Lessons
+We need to use the most updated FAF for all of our model work as soon as possible,
+or else develop a new interpolation method.

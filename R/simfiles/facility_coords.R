@@ -1,24 +1,24 @@
 library(dplyr, warn.conflicts = FALSE)
 suppressMessages(library(maptools))
 suppressMessages(library(rgdal))
+suppressMessages(library(rgeos))
 # Activity Coordinates ------
 # This script creates a table with the geographic coordinates for all the points
 # that trucks in the simulation can use.
 
-cat("   Making table of facility coordinates.\n")
+message("Making table of facility coordinates.\n")
 WGS84 <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
-LCC <- CRS("+proj=lcc +lat_1=49 +lat_2=45 +lat_0=44.25 +lon_0=-109.5 
-           +x_0=600000 +y_0=0 +ellps=GRS80 +units=m +no_defs")
+LCC <- CRS("+init=epsg:2818")
 
-counties <- readShapePoints("data_raw/shapefiles/cnty2faf.shp",
-                            proj4string = WGS84) %>%
+counties_poly <- readShapePoly("data_raw/shapefiles/cnty2faf.shp",
+                          proj4string = WGS84) %>%
   spTransform(LCC)
 
-counties <- counties@data %>%
+counties <- counties_poly@data %>%
   transmute(
-    name = as.character(GEOID), 
-    x = coordinates(counties)[, 1],
-    y = coordinates(counties)[, 2]
+    name = as.character(ANSI_ST_CO),
+    x = coordinates(counties_poly)[, 1],
+    y = coordinates(counties_poly)[, 2]
   )
 
 seaports <- readShapePoints("./data_raw/shapefiles/ntad/ports_major.shp",
@@ -26,7 +26,7 @@ seaports <- readShapePoints("./data_raw/shapefiles/ntad/ports_major.shp",
   spTransform(LCC)
 seaports <- seaports@data %>%
   transmute(
-    name = as.character(PORT), 
+    name = as.character(PORT),
     x = coordinates(seaports)[, 1],
     y = coordinates(seaports)[, 2]
   )
@@ -37,7 +37,7 @@ airports <- readShapePoints("./data_raw/shapefiles/ntad/airports.shp",
   spTransform(LCC)
 airports <- airports@data %>%
   transmute(
-    name = as.character(LOCID), 
+    name = as.character(LOCID),
     x = coordinates(airports)[, 1],
     y = coordinates(airports)[, 2]
   )
@@ -48,11 +48,20 @@ crossings <- readShapePoints("./data_raw/shapefiles/ntad/border_x.shp",
   spTransform(LCC)
 crossings <- crossings@data %>%
   transmute(
-    name = as.character(PortCode), 
+    name = as.character(PortCode),
     x = coordinates(crossings)[, 1],
-    y = coordinates(crossings)[, 2]
-  )
+    y = coordinates(crossings)[, 2],
+    trucks = Trucks
+  ) %>%
+  filter(trucks > 0) %>% select(-trucks)
 
 points <- rbind_list(counties, airports, seaports, crossings)
+
+points$geoid <- over(
+  SpatialPoints(coords = cbind(points$x, points$y), proj4string = LCC),
+  counties_poly
+) %>%
+  mutate(geoid = as.character(ANSI_ST_CO)) %>%
+  .$geoid
 
 write.csv(points, file = "data/simfiles/facility_coords.csv", row.names = FALSE)

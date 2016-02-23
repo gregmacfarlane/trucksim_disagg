@@ -1,0 +1,124 @@
+---
+title: "Zones"
+author: "Parsons Brinckerhoff"
+date: "October 15, 2015"
+output: html_document
+---
+```{r setup}
+library(dplyr)
+library(tidyr)
+library(foreign)
+```
+
+
+
+```{r faf_data}
+load("../data/faf_data.Rdata")
+
+prod <- FAF %>%
+  group_by(dms_orig) %>%
+  summarise(n = n(), value = sum(value), tons = sum(tons)) %>%
+  mutate(
+    state = substr(dms_orig, 1, 2)
+  )
+```
+
+Edits to the FAF zone system built from the CFS regions:
+
+  - Mobile to `012` from `013`
+  - Alaska to `020` from `029`
+  - Arkansas to `050` from `059`
+  - Phoenix to `041` from `049`
+  - Tuscon to `041` from `045`
+  - San Diego to `063` from `069`
+  - Fresno to `065` from `069`
+  - Los Angeles to `061` from `062`
+  - Sacramento to `062` from `064`
+  - Denver to `081` from `082`
+  - Hartford to `091` from `092`
+  - New York (Connecticut) to `092` from `094`
+  - Wilmington to `101` from `104`
+  - District of Columbia to `111` from `115`
+  - Jacksonville to `121` from `123`
+  - Orlando to `123` from `124`
+  - Tampa to `124` from `129`
+  - Miami to `122` from `123`
+  - Savannah to `132` from `134`
+  - Idaho to `160` from `169`
+  - St. Louis (Illinois) to `172` from `174`
+  - Fort Wayne to `183` from `182`
+  - Iowa to `190` from `199`
+  - Kansas City (Kansas) to `201` from `203`
+  - Wichita to `202` from `205`
+  - Cincinatti (Kentucky) to `212` from `211`
+  - Lexington to `211` from `213`
+  - Lake Charles to `222` from `229`
+  - Baton Rouge to `221` from `229`
+  - New Orleans to `223` from `224`
+  - Maine to `230` from `239`
+  - Baltimore to `241` from `245`
+  - Washington (Maryland) to `242` from `245`
+  - Detroit to `261` from `262`
+  - Minneapolis to `271` from `273`
+  - Mississippi to `280` from `289`
+  - Kansas City (Missouri) to `291` from `293`
+  - St. Louis to `292` from `294`
+  - Montana to `300` from `309`
+  - Omaha to `311` from `314`
+  - Las Vegas to `321` from `323`
+  - Philadelphia (New Jersey) to `342` from `344`
+  - New York (New Jersey) to `341` from `344`
+  - New Mexico to `350` from `359`
+  - Buffalo to `362` from `361`
+  - New York to `363` from `364`
+  - Raleigh to `373` from `374`
+  - North Dakota to `380` from `389`
+  - Cleveland to `392` from `391`
+  - Dayton to `394` from `392`
+  - Columbus to `393` from `391`
+  - Oklahoma City to `401` from `404`
+  - Tulsa to `402` from `405`
+  - Portland to `411` from `414`
+  - Pittsburgh to `422` from `424`
+  - Philadelphia to `421` from `424`
+  - New York (Pennsylvania) to `423` from `424`
+  - Charleston to `451` from `459`
+  - South Dakota to `460` from `469`
+  - Memphis to `471` from `473`
+  - Nashville to `472` from `474`
+  - Austin to `481` from `489`
+  - Port Arthur to `482` from `489`
+  - Corpus Christi to `483` from `489`
+  - Dallas to `484` from `482`
+  - El Paso to `485` from `482`
+  - Houston to `486` from `482`
+  - Laredo to `487` from `489`
+  - San Antonio to `488` from `489`
+  - Salt Lake City to `491` from `494`
+  - Vermont to `500` from `509`
+  - Richmond to `501` from `515`
+  - Virginia Beach to `512` from `515`
+  - Washington (Virginia) to `513` from `515`
+  - Seattle to `531` from `535` 
+  - Portland (Washington) to `532` from `534`
+  - West Virginia to `540` from `549`
+  - Milwaukee to `551` from `553`
+  - Wyoming to `560` from `569`
+  
+  
+```{r read_adjusted}
+cfs_zones <- read.dbf("../data_raw/shapefiles/faf4zone.dbf", as.is = TRUE)$F4Z
+faf_zones <- names(table(FAF$dms_orig))
+
+
+table(cfs_zones %in% faf_zones)
+table(faf_zones %in% cfs_zones)
+cfs_zones[!(cfs_zones %in% faf_zones)]
+faf_zones[!(faf_zones %in% cfs_zones)]
+```
+
+  
+  
+  
+  
+  

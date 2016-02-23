@@ -1,0 +1,139 @@
+---
+title: "trucks_calculation"
+author: "Gregory Macfarlane"
+date: "November 24, 2015"
+output: html_document
+---
+
+We follow the FAF 3 [traffic analysis methodology](http://faf.ornl.gov/fafweb/Data/Freight_Traffic_Analysis/chap3.htm)
+published by ORNL.
+
+```{r libs}
+library(dplyr)
+library(tidyr)
+library(readr)
+library(knitr)
+```
+
+
+# Factors
+Read the truck allocation factors (Table 3-3) into memory, and reshape to make
+it more useful. Also account for R's extremely annoying habit of converting
+everything it can into a factor.
+```{r allocation, results='asis'}
+# DEFINE TRUCK ALLOCATION FACTORS -------------------------------------------
+truck_allocation_factors <- read_csv("../data_raw/trucks/truckallocation.csv") %>%
+  gather(vehicle_type, allocation_factor, -distance, convert = TRUE)
+kable(truck_allocation_factors)
+```
+
+
+Read the truck equivalency factors found in Appendix A of the FAF3 Freight
+Traffic Analysis report, which we'll need to convert from wide to tall format.
+```{r equivalence}
+truck_equivalency_factors <- read_csv("../data_raw/trucks/truckequivalence.csv") %>%
+  gather(body_type, equiv_factor, auto:other, convert = TRUE)
+kable(truck_equivalency_factors %>% sample_n(10))
+```
+
+Finally, read empty truck factors from Table 3-5 and define a helper function
+to grab the appropriate ones by body type and flow direction. Again, convert
+from the original wide to tall format on the fly.
+
+```{r empty}
+empty_truck_factors <- read_csv("../data_raw/trucks/emptytrucks.csv") %>%
+  gather(vehicle_type, empty_factor, SU:TPT, convert = TRUE)
+kable(empty_truck_factors %>% sample_n(10))
+```
+
+
+It will be much more efficient to join all of the factors to the data at one
+time.
+```{r factors}
+truck_factors <- left_join(
+  truck_allocation_factors, truck_equivalency_factors, 
+  by = "vehicle_type"
+) %>%
+  left_join(empty_truck_factors, ., by = c("body_type", "vehicle_type"))
+kable(truck_factors %>% sample_n(10))
+```
+
+# Application
+
+We can walk through the process to convert a row of the FAF into loaded and
+empty trucks. Recreate the conversion laid out in Table 3-6 of the FAF3 Freight Traffic
+Analyis report.
+
+```{r faf_row}
+flow_records <- data_frame(
+  id = 1, dms_orig=49, dms_dest=41, sctg="03", tons=1519.150, 
+  value=1373.96, distance="(100,200]", crossing_type = "land_border",
+  fr_inmode = NA, fr_outmode = NA
+)
+kable(flow_records)
+```
+
+Join the truck factors to the flow records table, `left_join` will expand
+the LHS table as neccessary to match as many records as in needs to on the
+RHS.
+```{r expanded}
+expandedtable <- left_join(
+  flow_records, truck_factors, by = c("sctg", "distance", "crossing_type")
+) 
+kable(
+  expandedtable %>%
+    select(tons, distance, crossing_type, body_type, vehicle_type, empty_factor,
+           allocation_factor, equiv_factor)
+)
+```
+
+We now multiply the factors through the data.frame to get number of
+trucks in each body type and each vehicle type. 
+```{r truck_table}
+truck_table <- expandedtable %>%
+  mutate(
+    # tons in FAF are given in kilotons
+    trucks = 1000 * tons * allocation_factor * equiv_factor, 
+    # As well as the number of empty trucks!
+    empty_trucks = trucks * empty_factor
+  )
+
+kable(
+  truck_table %>% 
+    select(tons, body_type, vehicle_type, trucks, empty_trucks)
+)
+```
+
+We care about vehicle type, but not body type. So let's group on the `id`
+field as well as the `vehicle_type`, and then collapse everything else.
+But we also want to keep the relevant fields from the original data.
+because these are constant, we'll just take the first record in each group.
+```{r outtable}
+outtable <- truck_table %>%
+  group_by(id, vehicle_type) %>%
+  # we obviously want the sum of the trucks and the empty trucks.
+  summarise(
+    trucks = sum(trucks), empty_trucks = sum(empty_trucks), 
+    dms_orig = dms_orig[1], dms_dest = dms_dest[1], sctg = sctg[1], 
+    tons = tons[1], value = value[1]
+  ) %>%
+  gather(type, trucks, trucks:empty_trucks) %>%
+  mutate(
+    type = ifelse(
+      type == "empty_trucks",  
+      paste(vehicle_type, "empty", sep = ":"), 
+      vehicle_type
+    )
+  )
+
+kable(outtable)
+```
+
+It's difficult to calculate the average load per truck from this output, because
+we would need to apply the same allocation factors that we used in creating it.
+But grouping all trucks together, we get
+
+```{r load_per_truck}
+1519.15 * 1000 / sum(outtable$trucks[1:5]) # loaded trucks only
+```
+

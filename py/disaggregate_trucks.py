@@ -1,11 +1,10 @@
 __author__ = 'Greg'
 
 import pandas as pd
-import gzip
 import numpy as np
-import lxml.etree as et
 import itertools
 import multiprocessing as mp
+import csv
 
 
 def recur_dictify(frame):
@@ -32,11 +31,16 @@ def pick_county(dict_table, sctg, zone):
     :return: the O or D county FIPS code
     """
     # get the relevant county lookup table
-    county = np.random.choice(
-        dict_table[zone][sctg].keys(),
-        p=dict_table[zone][sctg].values())
-    return county
-
+    try:
+        a = dict_table[zone][sctg]
+    except KeyError:
+        print "Key not found for zone ", zone, " and commodity ", sctg
+        sys.exit()
+    else:
+        county = np.random.choice(
+            dict_table[zone][sctg].keys(),
+            p=dict_table[zone][sctg].values())
+        return county
 
 def pick_ienode(dict_table, mode, zone):
     """
@@ -51,13 +55,41 @@ def pick_ienode(dict_table, mode, zone):
         p=dict_table[zone][mode].values())
     return ienode
 
+def pick_taz(county_dict, sctg, point) :
+    """
+    :param county_dict: a dictionary of the simulation points inside the halo that need to be disaggregated to the TAZ level. This has by-commodity fields with make and use coefficients.
+    :param point: The point (either a county or an import/export node) to which the simulation has assigned the shipment.
+    :return: the TAZ to which the truck is destined
+    """
+    # If the global variable is set to counties only, then just return the original
+    # input
+    if region == "counties":
+        return(point)
+    else:
+        if point in COUNTY_TO_TAZ:
+            taz = COUNTY_TO_TAZ[point]
+        else:
+            try:
+                probs = county_dict[point][sctg].values()
+                probs /= sum(probs)   # renormalize probability vector
+                taz = np.random.choice(
+                    county_dict[point][sctg].keys(),
+                    p=probs
+                )
+            except KeyError:
+                # if it doesn't exist in either dictionary, return NA
+                taz = "NA"
+        return taz
 
 def get_start_day():
     """
     :return: a random day of the week. For now all days are the same,
     but we don't have to make it that way. We have a one-week simulation
     """
-    return np.random.randint(0, 6)
+    if NUMBER_DAYS == 1:
+        return 0
+    else:
+        return np.random.randint(0, NUMBER_DAYS - 1)
 
 
 def get_departure_time():
@@ -93,11 +125,44 @@ def get_coord(name, dim):
 def make_plans(df):
     l = []
     for index, row in df.iterrows():
+        # sample down the number of trucks to the simulation period
         trucks = np.random.binomial(row['trucks'],
-          6 / 365.25 * 1.02159 * SAMPLE_RATE)   # one day, AAWDT, sample rate
+          NUMBER_DAYS / 365.25 * 1.02159 * SAMPLE_RATE)
         l += [TruckPlan(row) for _ in range(trucks)]
     return l
 
+def write_output(list, file, type):
+    """Write truck plans to file
+    
+    Args:
+        list: a list of objects of class TruckPlan
+        file: a path to the output file
+        type: which type of output to produce
+        
+    Returns:
+        Writes to a file. If type = `csv` then the result is a csv with the
+        origin, destination, number of trucks by sctg code. Otherwise, writes to
+        a MATSim plans file.
+     """
+     
+    if type == "csv":
+        with open(file, 'w') as f:
+            columns = ['id', 'origin', 'destination', 'config', 'sctg']
+            writer = csv.DictWriter(f, columns)
+            writer.writeheader()
+            for truck in list:
+                writer.writerow(truck.write_detailed_plan())
+    else:
+        # Create the element tree container
+        population = et.Element("population")
+        pop_file = et.ElementTree(population)
+        
+        for truck in list:
+            truck.write_plan(population)
+
+        with gzip.open(file, 'w', compresslevel=4) as f:
+            f.write("""<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v5.dtd">""")
+            pop_file.write(f, pretty_print=True)
 
 class TruckPlan(object):
     """Critical information for the truck plan
@@ -111,6 +176,8 @@ class TruckPlan(object):
         inmode:
         outmode:
     """
+    __slots__ = ['id', 'origin', 'destination', 'sctg', 'inmode', 'outmode',
+     'time', 'type']
 
     def __init__(self, row):
         """
@@ -161,12 +228,15 @@ class TruckPlan(object):
             # Is it going to states on the west coast?
             if self.destination in west_coast_f3z:
                 # I-5 at the Washington/British Columbia border
-                self.origin = '3004'
+                self.origin = pick_taz(MAKE_LOCAL, self.sctg, '3004')
             else:
                 # I-15 at the Montana/Alberta border
-                self.origin = '3310'
+                self.origin = pick_taz(MAKE_LOCAL, self.sctg, '3310')
         else:
-            self.origin = pick_county(MAKE_DICT, self.sctg, self.origin)
+            self.origin = pick_taz(
+              MAKE_LOCAL, self.sctg,
+              pick_county(MAKE_DICT, self.sctg, self.origin)
+            )
 
     def get_destination(self):
         # Is the truck going to Alaska?
@@ -176,13 +246,15 @@ class TruckPlan(object):
             # the state
             if self.origin[:2] in west_coast_states:
                 # I-5 at the Washington/British Columbia border
-                self.destination = '3004'
+                self.destination = pick_taz(USE_LOCAL, self.sctg, "3004")
             else:
                 # I-15 at the Montana/Alberta border
-                self.destination = '3310'
+                self.destination = pick_taz(USE_LOCAL, self.sctg, "3310")
         else:
-            self.destination = pick_county(USE_DICT, self.sctg,
-                                           self.destination)
+            self.destination = pick_taz(
+              USE_LOCAL, self.sctg,
+              pick_county(USE_DICT, self.sctg, self.destination)
+            )
 
     def get_time(self):
         day = get_start_day()
@@ -197,29 +269,57 @@ class TruckPlan(object):
         et.SubElement(plan, "act",
                       attrib={'type': "dummy",
                               'x': get_coord(self.origin, 'x'),
-                              'y': get_coord(self.origin, 'x'),
+                              'y': get_coord(self.origin, 'y'),
                               'end_time': str(self.time)})
         et.SubElement(plan, "leg", attrib={'mode': "car"})
         et.SubElement(plan, "act",
                       attrib={'type': "dummy",
                               'x': get_coord(self.destination, 'x'),
                               'y': get_coord(self.destination, 'y')})
-
+                              
+    def write_detailed_plan(self):
+        row = {'id': self.id,
+               'origin': self.origin,
+               'destination': self.destination,
+               'config': self.type,
+               'sctg': self.sctg}
+        return row
 
 if __name__ == "__main__":
     # sampling rate to use in the simulation
     SAMPLE_RATE = 1
+    NUMBER_DAYS = 1
+    output_file = "test.csv"
+    output_type = "csv"
+    region = "taz"
 
     # Read in the I/O tables and convert them to dictionaries.
     print "  Reading input tables"
     MAKE_DICT = recur_dictify(pd.read_csv(
         "./data/simfiles/make_table.csv",
-        dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
+        dtype={'sctg': np.str, 'F4Z': np.str, 'name': np.str}
     ))
 
     USE_DICT = recur_dictify(pd.read_csv(
         "./data/simfiles/use_table.csv",
-        dtype={'sctg': np.str, 'F3Z': np.str, 'name': np.str}
+        dtype={'sctg': np.str, 'F4Z': np.str, 'name': np.str}
+    ))
+
+    # If we are sending it to a lower level than counties
+    MAKE_LOCAL = recur_dictify(pd.read_csv(
+        "./data/simfiles/make_local.csv",
+        dtype={'county': np.str, 'sctg': np.str, 'taz': np.str}
+    ))
+
+    USE_LOCAL = recur_dictify(pd.read_csv(
+        "./data/simfiles/use_local.csv",
+        dtype={'county': np.str, 'sctg': np.str, 'taz': np.str}
+    ))
+
+    # NCSTM aggregation tables.
+    COUNTY_TO_TAZ = recur_dictify(pd.read_csv(
+        "./data/simfiles/county_to_taz.csv",
+        dtype={'county': np.str, 'sctg': np.str, 'taz': np.str}
     ))
 
     # To handle Alaska shipments appropriately, we need to have a list of
@@ -234,7 +334,7 @@ if __name__ == "__main__":
     # crossings in the FAF zone.
     EXIM_DICT = recur_dictify(pd.read_csv(
         "./data/simfiles/ie_nodes.csv",
-        dtype={'F3Z': np.str, 'mode': np.str, 'name': np.str}
+        dtype={'F4Z': np.str, 'mode': np.str, 'name': np.str}
     ))
 
     # Geographical points for the activity locations
@@ -258,7 +358,7 @@ if __name__ == "__main__":
     # n_cores equal parts and do the origin and destination assignment off on
     # all the child cores. When we return all of the TruckPlans objects, we can
     # create their xml nodes and give them new ids.
-    n_cores = mp.cpu_count() - 1  # leave yourself one core
+    n_cores = mp.cpu_count()
     print "  Creating truck plans with ", n_cores, " separate processes"
     p = mp.Pool(processes=n_cores)
     split_dfs = np.array_split(faf_trucks, n_cores)
@@ -268,19 +368,8 @@ if __name__ == "__main__":
     l = [a for L in pool_results for a in L]   # put all TPlans in same list
     print "  Created plans for", len(l), "trucks."
 
-    # Create the element tree container
-    population = et.Element("population")
-    pop_file = et.ElementTree(population)
-
-    # make new ids and write each truck's plan into the population tree
+    # make new ids and write each truck's plan to a CSV
     for i, truck in itertools.izip(range(len(l)), l):
         truck.set_id(i)
 
-    for truck in l:
-        truck.write_plan(population)
-
-    with gzip.open('population.xml.gz', 'w', compresslevel=4) as f:
-        f.write("""<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v5.dtd">
-""")
-        pop_file.write(f, pretty_print=True)
+    write_output(l, output_file, output_type)

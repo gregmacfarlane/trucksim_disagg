@@ -6,6 +6,63 @@ import itertools
 import multiprocessing as mp
 import csv
 
+import sys, getopt
+import os.path
+
+def main(argv):
+    """
+    Handle input arguments from command line
+    """
+    # program defaults
+    SAMPLE_RATE = 1
+    NUMBER_DAYS = 1
+    output_file = 'sim_output.csv'
+    output_type = 'xml'
+    region = "counties"
+    
+    
+    # try to get the arguments
+    try:
+        opts, args = getopt.getopt(argv,"hs:o:d:r:",["samplerate=","ofile=","numberdays=","region="])
+    except getopt.GetoptError:
+        print 'disaggregate_trucks.py -s <samplerate> -o <outputfile> -d <numberdays> -r <region>'
+        sys.exit(2)
+        
+    for opt, arg in opts:
+        if opt == '-h':
+            print 'disaggregate_trucks.py -s <samplerate> -o <outputfile> -d <numberdays> -r <region>'
+            sys.exit()
+        elif opt in ("-s", "--samplerate"):
+            try:
+                SAMPLE_RATE = float(arg)
+            except ValueError:
+                print 'samplerate must be numeric'
+                sys.exit(2)
+        elif opt in ("-d", "--days"):
+            try:
+                NUMBER_DAYS = int(arg)
+            except ValueError:
+                print 'days must be integer'
+                sys.exit(2)
+        elif opt in ("-o", "--outputfile"):
+            output_file = arg
+            output_type = os.path.splitext(output_file)[1][1:]
+            if output_type != 'xml' and output_type != 'csv':
+                print 'output must be either xml or csv'
+                sys.exit(2)
+        elif opt in ("-r", "--region"):
+            region = arg
+            if region != 'numas' and region != 'counties':
+                print 'region must be either numas or counties'
+                sys.exit(2)
+                
+    print 'Sampling Rate of ', SAMPLE_RATE
+    print 'Days in simulation: ', NUMBER_DAYS
+    print 'Output file is ', output_file
+    print 'Type is ', output_type
+    print 'Disaggregating to ', region
+
+
 
 def recur_dictify(frame):
     """
@@ -286,15 +343,11 @@ class TruckPlan(object):
         return row
 
 if __name__ == "__main__":
-    # sampling rate to use in the simulation
-    SAMPLE_RATE = 1
-    NUMBER_DAYS = 1
-    output_file = "test.csv"
-    output_type = "csv"
-    region = "taz"
+    # handle arguments
+    main(sys.argv[1:])
 
     # Read in the I/O tables and convert them to dictionaries.
-    print "  Reading input tables"
+    print "  Reading make and use tables"
     MAKE_DICT = recur_dictify(pd.read_csv(
         "./data/simfiles/make_table.csv",
         dtype={'sctg': np.str, 'F4Z': np.str, 'name': np.str}

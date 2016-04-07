@@ -36,7 +36,7 @@ library(readr)
 trucks <- read_csv("county_plans.csv", col_types = "ccccc")  %>%
     # determine if truck is MU or SU
     # Add up to i, j, by class
-    group_by(origin, destination, sctg) %>%
+    group_by(origin, destination, sctg, config) %>%
     summarise(n = n()) 
 
-write_csv(trucks, "county_od_sctg.csv")
+write_csv(trucks, "county_od_config.csv")

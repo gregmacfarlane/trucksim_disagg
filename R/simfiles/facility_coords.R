@@ -49,7 +49,7 @@ crossings <- readShapePoints("./data_raw/shapefiles/ntad/border_x.shp",
   spTransform(LCC)
 crossings <- crossings@data %>%
   transmute(
-    name = as.character(PortCode),
+    name = paste("x", as.character(PortCode), sep = "_"),
     x = coordinates(crossings)[, 1],
     y = coordinates(crossings)[, 2],
     trucks = Trucks

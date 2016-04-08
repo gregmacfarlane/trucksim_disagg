@@ -58,6 +58,8 @@ crossings <- crossings@data %>%
 
 points <- rbind_list(numas, airports, seaports, crossings)
 
+
+# coordinates and containing NUMA for all facilities.
 points$numa <- over(
   SpatialPoints(coords = cbind(points$x, points$y), proj4string = LCC),
   numas_poly

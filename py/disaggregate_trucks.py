@@ -1,6 +1,5 @@
 __author__ = 'Greg'
 
-import pandas as pd
 import numpy as np
 import feather
 import itertools
@@ -15,12 +14,16 @@ def main(argv):
     Handle input arguments from command line
     """
     # program defaults
+    global SAMPLE_RATE
     SAMPLE_RATE = 1
+    global NUMBER_DAYS
     NUMBER_DAYS = 1
+    global output_file
     output_file = 'sim_output.csv'
-    output_type = 'xml'
-    region = "counties"
-    
+    global output_type
+    output_type = 'csv'
+    global region
+    region = "numas"
     
     # try to get the arguments
     try:
@@ -57,11 +60,6 @@ def main(argv):
                 print 'region must be either numas or counties'
                 sys.exit(2)
                 
-    print 'Sampling Rate of ', SAMPLE_RATE
-    print 'Days in simulation: ', NUMBER_DAYS
-    print 'Output file is ', output_file
-    print 'Type is ', output_type
-    print 'Disaggregating to ', region
 
 
 
@@ -124,20 +122,20 @@ def pick_numa(county_dict, sctg, point) :
     if region == "counties":
         return(point)
     else:
-        if point in COUNTY_TO_TAZ:
-            taz = COUNTY_TO_TAZ[point]
-        else:
+        try:
+            probs = county_dict[point][sctg].values()
+            probs /= sum(probs)   # renormalize probability vector
             try:
-                probs = county_dict[point][sctg].values()
-                probs /= sum(probs)   # renormalize probability vector
                 taz = np.random.choice(
                     county_dict[point][sctg].keys(),
                     p=probs
                 )
-            except KeyError:
-                # if it doesn't exist in either dictionary, return NA
+            except ValueError:
                 taz = "NA"
-        return taz
+        except KeyError:
+            # if it doesn't exist in either dictionary, return NA
+            taz = "NA"
+    return taz
 
 def get_start_day():
     """
@@ -185,7 +183,8 @@ def make_plans(df):
     for index, row in df.iterrows():
         # sample down the number of trucks to the simulation period
         trucks = np.random.binomial(row['trucks'],
-          NUMBER_DAYS / 365.25 * 1.02159 * SAMPLE_RATE)
+          min(NUMBER_DAYS / 365.25 * 1.02159 * SAMPLE_RATE,
+              1))
         l += [TruckPlan(row) for _ in range(trucks)]
     return l
 
@@ -260,6 +259,10 @@ class TruckPlan(object):
             try:
                 # If a valid import node exists, use it
                 self.origin = pick_ienode(EXIM_DICT, self.inmode, self.origin)
+                if output_type == "csv":
+                    #if xml then the coordinate is already known. If csv, need
+                    #to grab NUMA
+                    self.origin = get_coord("numa", self.origin)
             except KeyError:
                 # If it doesn't, just assign like normal
                 self.get_origin()
@@ -272,6 +275,10 @@ class TruckPlan(object):
                 # If a valid import node exists, use it
                 self.destination = pick_ienode(EXIM_DICT, self.outmode,
                                                self.destination)
+                if output_type == "csv":
+                    #if xml then the coordinate is already known. If csv, need
+                    #to join to NUMA
+                    self.destination = get_coord("numa", self.destination)
             except KeyError:
                 # If it doesn't, just assign like normal
                 self.get_destination()
@@ -351,6 +358,11 @@ class TruckPlan(object):
 if __name__ == "__main__":
     # handle arguments
     main(sys.argv[1:])
+    print 'Sampling Rate of ', SAMPLE_RATE
+    print 'Days in simulation: ', NUMBER_DAYS
+    print 'Output file is ', output_file
+    print 'Type is ', output_type
+    print 'Disaggregating to ', region
 
     # Read in the I/O tables and convert them to dictionaries.
     # These tables are for FAF zone to county disaggregation
@@ -378,7 +390,7 @@ if __name__ == "__main__":
     EXIM_DICT = recur_dictify(feather.read_dataframe(
         "./data/simfiles/ie_nodes.feather"
     )[['F4Z', 'mode', 'name', 'prob']])
-
+    
 
     # To handle Alaska shipments appropriately, we need to have a list of
     # states/faf zones where the trucks will either drive down the coast to
@@ -390,10 +402,10 @@ if __name__ == "__main__":
 
 
     # Geographical points for the activity locations
-    if output_type = "xml":
-        FAC_COORDS = feather.read_dataframe(
-            "./data/simfiles/facility_coords.feather",
-        ).set_index('name').to_dict()
+    # also contains name-numa lookup for import export nodes
+    FAC_COORDS = feather.read_dataframe(
+        "./data/simfiles/facility_coords.feather",
+    ).set_index('name').to_dict()
 
     # read in the split trucks file with numbers of trucks going from i to j.
     faf_trucks = feather.read_dataframe("./data/simfiles/faf_trucks.feather")

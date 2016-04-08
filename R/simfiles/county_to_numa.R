@@ -123,4 +123,3 @@ use_coefs <-
 # output =======
 write_feather(make_coefs, "data/simfiles/make_local.feather")
 write_feather(use_coefs,  "data/simfiles/use_local.feather")
-write_feather(ie, "data/simfiles/ie_nodes.feather")

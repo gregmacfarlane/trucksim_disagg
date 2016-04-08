@@ -79,7 +79,8 @@ crossings_f4z <- over(crossings, FAFzones)$F4Z
 
 crossings <- crossings@data %>% 
   mutate(
-    name = PortCode, mode = 1,
+    name = paste("x", as.character(PortCode), sep = "_"),
+    mode = 1,
     F4Z = crossings_f4z
     )  %>%
   filter(Trucks > 0) %>% 

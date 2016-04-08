@@ -22,7 +22,7 @@ all: $(MASTER)
 
 $(MASTER): py/disaggregate_trucks.py
 	@echo Simulating truck O and D
-	@python $<
+	@python $< -o "numa_month.csv" -d "30" -s "1"
 
 $(MASTER): $(SIMFILES)
 

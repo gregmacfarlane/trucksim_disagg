@@ -11,15 +11,15 @@ message("Making table of facility coordinates.\n")
 WGS84 <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
 LCC <- CRS("+init=epsg:2818")
 
-counties_poly <- readShapePoly("data_raw/shapefiles/cnty2faf.shp",
+numas_poly <- readShapePoly("data_raw/shapefiles/numa.shp",
                           proj4string = WGS84) %>%
   spTransform(LCC)
 
-counties <- counties_poly@data %>%
+numas <- numas_poly@data %>%
   transmute(
-    name = as.character(ANSI_ST_CO),
-    x = coordinates(counties_poly)[, 1],
-    y = coordinates(counties_poly)[, 2]
+    name = as.character(ID),
+    x = coordinates(numas_poly)[, 1],
+    y = coordinates(numas_poly)[, 2]
   )
 
 seaports <- readShapePoints("./data_raw/shapefiles/ntad/ports_major.shp",
@@ -56,13 +56,13 @@ crossings <- crossings@data %>%
   ) %>%
   filter(trucks > 0) %>% select(-trucks)
 
-points <- rbind_list(counties, airports, seaports, crossings)
+points <- rbind_list(numas, airports, seaports, crossings)
 
-points$geoid <- over(
+points$numa <- over(
   SpatialPoints(coords = cbind(points$x, points$y), proj4string = LCC),
-  counties_poly
+  numas_poly
 ) %>%
-  mutate(geoid = as.character(ANSI_ST_CO)) %>%
-  .$geoid
+  mutate(numa = as.character(ID)) %>%
+  .$numa
 
 write_feather(points, "data/simfiles/facility_coords.feather")

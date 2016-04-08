@@ -113,7 +113,7 @@ def pick_ienode(dict_table, mode, zone):
         p=dict_table[zone][mode].values())
     return ienode
 
-def pick_taz(county_dict, sctg, point) :
+def pick_numa(county_dict, sctg, point) :
     """
     :param county_dict: a dictionary of the simulation points inside the halo that need to be disaggregated to the TAZ level. This has by-commodity fields with make and use coefficients.
     :param point: The point (either a county or an import/export node) to which the simulation has assigned the shipment.
@@ -191,6 +191,11 @@ def make_plans(df):
 
 def write_output(list, file, type):
     """Write truck plans to file
+    
+    Depending on the needs of the project, this function can write either an
+    origin-destination node with details of the truck to a CSV,
+    or it can write a MATSim plan set. This is controlled with the
+    -t argument, and writes to matsim by default.
     
     Args:
         list: a list of objects of class TruckPlan
@@ -286,12 +291,12 @@ class TruckPlan(object):
             # Is it going to states on the west coast?
             if self.destination in west_coast_f3z:
                 # I-5 at the Washington/British Columbia border
-                self.origin = pick_taz(MAKE_LOCAL, self.sctg, '3004')
+                self.origin = pick_numa(MAKE_LOCAL, self.sctg, '3004')
             else:
                 # I-15 at the Montana/Alberta border
-                self.origin = pick_taz(MAKE_LOCAL, self.sctg, '3310')
+                self.origin = pick_numa(MAKE_LOCAL, self.sctg, '3310')
         else:
-            self.origin = pick_taz(
+            self.origin = pick_numa(
               MAKE_LOCAL, self.sctg,
               pick_county(MAKE_DICT, self.sctg, self.origin)
             )
@@ -304,12 +309,12 @@ class TruckPlan(object):
             # the state
             if self.origin[:2] in west_coast_states:
                 # I-5 at the Washington/British Columbia border
-                self.destination = pick_taz(USE_LOCAL, self.sctg, "3004")
+                self.destination = pick_numa(USE_LOCAL, self.sctg, "3004")
             else:
                 # I-15 at the Montana/Alberta border
-                self.destination = pick_taz(USE_LOCAL, self.sctg, "3310")
+                self.destination = pick_numa(USE_LOCAL, self.sctg, "3310")
         else:
-            self.destination = pick_taz(
+            self.destination = pick_numa(
               USE_LOCAL, self.sctg,
               pick_county(USE_DICT, self.sctg, self.destination)
             )

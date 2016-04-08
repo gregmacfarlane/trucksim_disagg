@@ -1,5 +1,6 @@
 # Truck Productions ------------------------------------------------------------
 library(dplyr, warn.conflicts = FALSE)
+library(feather)
 library(foreign)
 cat("  Calculating truck productions coefficients\n")
 # In this section we determine the origin locations of our trucks based on
@@ -110,4 +111,4 @@ CountyLabor <- inner_join(CBP, maketable, by = "naics") %>%
   select(F4Z, sctg, name, prob) %>%
   arrange(F4Z, sctg) %>% tbl_df()
 
-write.csv(CountyLabor, "./data/simfiles/make_table.csv", row.names = FALSE)
+write_feather(CountyLabor, "./data/simfiles/make_table.feather")

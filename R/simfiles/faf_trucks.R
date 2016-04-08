@@ -4,6 +4,7 @@
 # between two zones takes. This is based on chapter 3 of the FAF manual.
 library(dplyr, warn.conflicts = FALSE)
 library(tidyr)
+library(feather)
 library(readr)
 suppressPackageStartupMessages(library(maptools, quietly = TRUE))
 library(parallel)
@@ -151,4 +152,4 @@ FAF <- rbind_all(
   mutate(trucks = ceiling(trucks))
 
 
-write.csv(FAF, file = "data/simfiles/faf_trucks.csv", row.names = FALSE)
+write_feather(FAF, "data/simfiles/faf_trucks.feather")

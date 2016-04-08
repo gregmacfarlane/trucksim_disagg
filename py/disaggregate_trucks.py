@@ -2,6 +2,7 @@ __author__ = 'Greg'
 
 import pandas as pd
 import numpy as np
+import feather
 import itertools
 import multiprocessing as mp
 import csv
@@ -347,33 +348,32 @@ if __name__ == "__main__":
     main(sys.argv[1:])
 
     # Read in the I/O tables and convert them to dictionaries.
-    print "  Reading make and use tables"
-    MAKE_DICT = recur_dictify(pd.read_csv(
-        "./data/simfiles/make_table.csv",
-        dtype={'sctg': np.str, 'F4Z': np.str, 'name': np.str}
-    ))
+    # These tables are for FAF zone to county disaggregation
+    print "  Reading county make and use tables"
+    MAKE_DICT = recur_dictify(feather.read_dataframe(
+        "./data/simfiles/make_table.feather"
+    )[['F4Z', 'sctg', 'name', 'prob']])
 
-    USE_DICT = recur_dictify(pd.read_csv(
-        "./data/simfiles/use_table.csv",
-        dtype={'sctg': np.str, 'F4Z': np.str, 'name': np.str}
-    ))
+    USE_DICT = recur_dictify(feather.read_dataframe(
+        "./data/simfiles/use_table.feather"
+    )[['F4Z', 'sctg', 'name', 'prob']])
 
-    # If we are sending it to a lower level than counties
-    MAKE_LOCAL = recur_dictify(pd.read_csv(
-        "./data/simfiles/make_local.csv",
-        dtype={'county': np.str, 'sctg': np.str, 'taz': np.str}
-    ))
+    # These tables are for county-to-numa disaggregation
+    print "  Reading NUMA make and use tables"
+    MAKE_LOCAL = recur_dictify(feather.read_dataframe(
+        "./data/simfiles/make_local.feather",
+    )[['county', 'sctg', 'numa', 'p']])
 
-    USE_LOCAL = recur_dictify(pd.read_csv(
-        "./data/simfiles/use_local.csv",
-        dtype={'county': np.str, 'sctg': np.str, 'taz': np.str}
-    ))
+    USE_LOCAL = recur_dictify(feather.read_dataframe(
+        "./data/simfiles/use_local.feather",
+    )[['county', 'sctg', 'numa', 'p']])
+    
+    # Exports/Imports are directed to airports, seaports, or highway border
+    # crossings in the FAF zone.
+    EXIM_DICT = recur_dictify(feather.read_dataframe(
+        "./data/simfiles/ie_nodes.feather"
+    )[['F4Z', 'mode', 'name', 'prob']])
 
-    # NCSTM aggregation tables.
-    COUNTY_TO_TAZ = recur_dictify(pd.read_csv(
-        "./data/simfiles/county_to_taz.csv",
-        dtype={'county': np.str, 'sctg': np.str, 'taz': np.str}
-    ))
 
     # To handle Alaska shipments appropriately, we need to have a list of
     # states/faf zones where the trucks will either drive down the coast to
@@ -383,25 +383,14 @@ if __name__ == "__main__":
     west_coast_f3z = range(61, 69) + range(411, 419) + range(531, 539) + \
                      range(321, 329) + range(41, 49) + [160] + range(491, 499)
 
-    # Exports/Imports are directed to airports, seaports, or highway border
-    # crossings in the FAF zone.
-    EXIM_DICT = recur_dictify(pd.read_csv(
-        "./data/simfiles/ie_nodes.csv",
-        dtype={'F4Z': np.str, 'mode': np.str, 'name': np.str}
-    ))
 
     # Geographical points for the activity locations
-    FAC_COORDS = pd.read_csv(
-        "./data/simfiles/facility_coords.csv",
-        dtype={'name': np.str}
+    FAC_COORDS = feather.read_dataframe(
+        "./data/simfiles/facility_coords.feather",
     ).set_index('name').to_dict()
 
     # read in the split trucks file with numbers of trucks going from i to j.
-    faf_trucks = pd.read_csv(
-        "./data/simfiles/faf_trucks.csv",
-        dtype={'dms_orig': np.str, 'dms_dest': np.str, 'sctg': np.str,
-               'trucks': np.int, 'fr_inmode': np.str, 'fr_outmode': np.str}
-    )
+    faf_trucks = feather.read_dataframe("./data/simfiles/faf_trucks.feather")
 
     print "  Maximum of", sum(faf_trucks['trucks']), "trucks."
 

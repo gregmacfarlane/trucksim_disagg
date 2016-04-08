@@ -1,4 +1,5 @@
 library(dplyr, warn.conflicts = FALSE)
+library(feather)
 suppressMessages(library(maptools))
 suppressMessages(library(rgdal))
 suppressMessages(library(rgeos))
@@ -64,4 +65,4 @@ points$geoid <- over(
   mutate(geoid = as.character(ANSI_ST_CO)) %>%
   .$geoid
 
-write.csv(points, file = "data/simfiles/facility_coords.csv", row.names = FALSE)
+write_feather(points, "data/simfiles/facility_coords.feather")

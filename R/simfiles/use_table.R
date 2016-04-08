@@ -3,6 +3,7 @@ library(dplyr, warn.conflicts = FALSE)
 library(tidyr)
 library(httr)
 library(readr)
+library(feather)
 library(XML)
 library(foreign)
 message("   Calculating truck attractions coefficients\n")
@@ -104,4 +105,4 @@ CountyDemand <- inner_join(CBP, usetable, by = "naics") %>%
   select(F4Z, sctg, name, prob) %>%
   arrange(F4Z, sctg) %>% tbl_df()
 
-write.csv(CountyDemand, "./data/simfiles/use_table.csv", row.names = FALSE)
+write_feather(CountyDemand, "data/simfiles/use_table.feather")

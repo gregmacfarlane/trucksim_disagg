@@ -1,4 +1,5 @@
 library(dplyr, warn.conflicts = FALSE)
+library(feather)
 suppressMessages(require(maptools))
 
 # Imports and Exports ----------------------------------------------------------
@@ -93,5 +94,5 @@ ienodes <- rbind_list(seaports, airports, crossings) %>%
   select(F4Z, mode, name, prob) %>%
   arrange(F4Z, mode)
 
-write.csv(ienodes, "./data/simfiles/ie_nodes.csv", row.names = FALSE)
+write_feather(ienodes, "./data/simfiles/ie_nodes.feather")
 

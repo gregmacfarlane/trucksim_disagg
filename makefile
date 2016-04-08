@@ -15,7 +15,7 @@ SCRIPTDIR = R/simfiles
 SIMULFDIR = data/simfiles
 
 SCRIPTS  := $(wildcard $(SCRIPTDIR)/*.R)
-SIMFILES := $(SCRIPTS:$(SCRIPTDIR)/%.R=$(SIMULFDIR)/%.csv)
+SIMFILES := $(SCRIPTS:$(SCRIPTDIR)/%.R=$(SIMULFDIR)/%.feather)
 
 all: $(MASTER)
 
@@ -28,18 +28,20 @@ $(MASTER): $(SIMFILES)
 
 # Each simulation table gets created by an R script with the same name in
 # R/simfiles
-$(SIMFILES): $(SIMULFDIR)/%.csv: $(SCRIPTDIR)/%.R
+$(SIMFILES): $(SIMULFDIR)/%.feather: $(SCRIPTDIR)/%.R
 	@mkdir -p data/simfiles
 	@echo making $@ from $<
 	@Rscript $< $(CORES)
 
-$(SIMULFDIR)/faf_trucks.csv: data/faf_data.Rdata
+$(SIMULFDIR)/county_to_numa.feather: $(SIMULFDIR)/facility_coords.feather $(SIMULFDIR)/ie_nodes.feather
 
-$(SIMULFDIR)/use_table.csv: $(SIMULFDIR)/make_table.csv
+$(SIMULFDIR)/faf_trucks.feather: data/faf_data.Rdata
 
-$(SIMULFDIR)/make_table.csv: data/cbp_data.Rdata
+$(SIMULFDIR)/use_table.feather: $(SIMULFDIR)/make_table.feather
 
-$(SIMULFDIR)/make_table.csv: data_raw/cfs_pums.csv
+$(SIMULFDIR)/make_table.feather: data/cbp_data.Rdata
+
+$(SIMULFDIR)/make_table.feather: data_raw/cfs_pums.csv
 
 # Read cleaned source data into R.
 data/faf_data.Rdata: data_raw/faf4_data.csv R/prep_FAF.R

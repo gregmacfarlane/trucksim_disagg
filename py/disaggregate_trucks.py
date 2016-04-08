@@ -390,9 +390,10 @@ if __name__ == "__main__":
 
 
     # Geographical points for the activity locations
-    FAC_COORDS = feather.read_dataframe(
-        "./data/simfiles/facility_coords.feather",
-    ).set_index('name').to_dict()
+    if output_type = "xml":
+        FAC_COORDS = feather.read_dataframe(
+            "./data/simfiles/facility_coords.feather",
+        ).set_index('name').to_dict()
 
     # read in the split trucks file with numbers of trucks going from i to j.
     faf_trucks = feather.read_dataframe("./data/simfiles/faf_trucks.feather")

@@ -363,34 +363,26 @@ if __name__ == "__main__":
     print 'Output file is ', output_file
     print 'Type is ', output_type
     print 'Disaggregating to ', region
+    simdir = "data/simfiles/"
 
     # Read in the I/O tables and convert them to dictionaries.
     # These tables are for FAF zone to county disaggregation
     print "  Reading county make and use tables"
-    MAKE_DICT = recur_dictify(feather.read_dataframe(
-        "./data/simfiles/make_table.feather"
-    )[['F4Z', 'sctg', 'name', 'prob']])
-
-    USE_DICT = recur_dictify(feather.read_dataframe(
-        "./data/simfiles/use_table.feather"
-    )[['F4Z', 'sctg', 'name', 'prob']])
+    MAKE_DICT = pickle.load(open(simdir + "make_table.pickle", "rb"))
+    USE_DICT = pickle.load(open(simdir + "use_table.pickle", "rb"))
 
     # These tables are for county-to-numa disaggregation
     print "  Reading NUMA make and use tables"
-    MAKE_LOCAL = recur_dictify(feather.read_dataframe(
-        "./data/simfiles/make_local.feather",
-    )[['county', 'sctg', 'numa', 'p']])
+    MAKE_LOCAL = pickle.load(open(simdir + "make_local.pickle", "rb"))
+    USE_LOCAL = pickle.load(open(simdir + "use_local.pickle", "rb"))
 
-    USE_LOCAL = recur_dictify(feather.read_dataframe(
-        "./data/simfiles/use_local.feather",
-    )[['county', 'sctg', 'numa', 'p']])
-    
     # Exports/Imports are directed to airports, seaports, or highway border
     # crossings in the FAF zone.
-    EXIM_DICT = recur_dictify(feather.read_dataframe(
-        "./data/simfiles/ie_nodes.feather"
-    )[['F4Z', 'mode', 'name', 'prob']])
-    
+    EXIM_DICT = pickle.load(open(simdir + "ie_nodes.pickle", "rb"))
+
+    # Geographical points for the activity locations
+    # also contains name-numa lookup for import export nodes
+    FAC_COORDS = pickle.load(open(simdir + "facility_coords.feather", "rb"))
 
     # To handle Alaska shipments appropriately, we need to have a list of
     # states/faf zones where the trucks will either drive down the coast to

@@ -16,22 +16,26 @@ SIMULFDIR = data/simfiles
 
 SCRIPTS  := $(wildcard $(SCRIPTDIR)/*.R)
 SIMFILES := $(SCRIPTS:$(SCRIPTDIR)/%.R=$(SIMULFDIR)/%.feather)
+PYDICTS  := $(SIMFILES:$(SIMULFDIR)/%.feather=$(SIMULFDIR)/%.pickle)
 
 all: $(MASTER)
 
 
-$(MASTER): py/disaggregate_trucks.py
+$(MASTER): py/disaggregate_trucks.py $(PYDICTS)
 	@echo Simulating truck O and D
-	@python $< -o "numa_month.csv" -d "30" -s "1" -r "numas"
-
-$(MASTER): $(SIMFILES)
-
+	@python $< -o $@ -d "1" -s "1" -r "numas"
+	
 # Each simulation table gets created by an R script with the same name in
 # R/simfiles
 $(SIMFILES): $(SIMULFDIR)/%.feather: $(SCRIPTDIR)/%.R
 	@mkdir -p data/simfiles
 	@echo making $@ from $<
 	@Rscript $< $(CORES)
+	
+$(PYDICTS): $(SIMULFDIR)/%.pickle: $(SIMULFDIR)/%.feather
+	@echo pickling $@ from $<
+	python py/build_dicts.py -i $< -o $@
+
 
 $(SIMULFDIR)/county_to_numa.feather: $(SIMULFDIR)/facility_coords.feather $(SIMULFDIR)/ie_nodes.feather
 
@@ -40,7 +44,7 @@ $(SIMULFDIR)/faf_trucks.feather: data/faf_data.Rdata
 $(SIMULFDIR)/use_table.feather: $(SIMULFDIR)/make_table.feather
 
 $(SIMULFDIR)/make_table.feather: data/cbp_data.Rdata
-
+	
 $(SIMULFDIR)/make_table.feather: data_raw/cfs_pums.csv
 
 # Read cleaned source data into R.

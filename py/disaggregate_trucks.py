@@ -401,10 +401,10 @@ class TruckPlan(object):
             # Is it going to states on the west coast?
             if self.destination in west_coast_f3z:
                 # I-5 at the Washington/British Columbia border
-                self.origin = pick_numa(MAKE_LOCAL, self.sctg, '3004')
+                self.origin = pick_numa(MAKE_LOCAL, self.sctg, 'x_3004')
             else:
                 # I-15 at the Montana/Alberta border
-                self.origin = pick_numa(MAKE_LOCAL, self.sctg, '3310')
+                self.origin = pick_numa(MAKE_LOCAL, self.sctg, 'x_3310')
         else:
             self.origin = pick_numa(
               MAKE_LOCAL, self.sctg,

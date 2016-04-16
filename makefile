@@ -43,9 +43,7 @@ $(SIMULFDIR)/faf_trucks.feather: data/faf_data.Rdata
 
 $(SIMULFDIR)/use_table.feather: $(SIMULFDIR)/make_table.feather
 
-$(SIMULFDIR)/make_table.feather: data/cbp_data.Rdata
-	
-$(SIMULFDIR)/make_table.feather: data_raw/cfs_pums.csv
+$(SIMULFDIR)/make_table.feather: data/cbp_data.Rdata data_raw/cfs_pums.csv
 
 $(SCRIPTDIR)/make_local.R: data/numa_lookup.rds
 	

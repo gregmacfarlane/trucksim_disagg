@@ -47,6 +47,13 @@ $(SIMULFDIR)/make_table.feather: data/cbp_data.Rdata
 	
 $(SIMULFDIR)/make_table.feather: data_raw/cfs_pums.csv
 
+$(SCRIPTDIR)/make_local.R: data/numa_lookup.rds
+	
+$(SCRIPTDIR)/use_local.R: data/numa_lookup.rds
+	
+data/numa_lookup.rds: R/numa_county_lookup.R
+	Rscript $<
+
 # Read cleaned source data into R.
 data/faf_data.Rdata: data_raw/faf4_data.csv R/prep_FAF.R
 	@echo Reading FAF data into R

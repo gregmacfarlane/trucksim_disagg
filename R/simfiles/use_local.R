@@ -2,41 +2,14 @@
 library(readr)
 library(dplyr, warn.conflicts = FALSE)
 library(tidyr)
-suppressPackageStartupMessages(library(maptools))
-suppressPackageStartupMessages(library(rgdal))
 library(feather)
-suppressPackageStartupMessages(library(rgeos))
 library(foreign)
-# This script creates a county -> numa lookup table for disaggregating the county
-# flows down another level.
-wgs84 <- CRS("+init=epsg:4326")
-lcc <- CRS("+init=epsg:2818")
 
-message("  Building local use table")
-# read numa shapefile
-numa_shp <- readShapePoly(
-  "data_raw/shapefiles/numa.shp",
-  proj4string = wgs84
-) %>%
-  spTransform(., lcc)
 
-# NUMA Productions/ Attractions ============
-# NUMAs are all contained within a single county, but some county flows
-# will need to be divided to the several numas that exist within that county.
-# In this section we find the county that each numa lies in and develop size
-# terms on the make and use side that we use to disaggregate
-counties_shp <- readShapeSpatial(
-  "data_raw/shapefiles/cnty2faf.shp", proj4string = wgs84
-  ) %>%
-  spTransform(., lcc)
+numa_lookup <- readRDS("data/numa_lookup.rds")
 
-# Read NUMA shapefile with se data
 
-numa_coords <- gCentroid(numa_shp, byid = TRUE)
-numa_coords$numa <- as.character(numa_shp$ID)
-numa_coords$county <- over( numa_coords, counties_shp )$ANSI_ST_CO
-
-se <- numa_shp@data %>%
+se <- read.dbf("data_raw/shapefiles/numa.dbf", as.is = TRUE) %>%
   tbl_df() %>%
   transmute(
     numa = as.character(ID),
@@ -44,7 +17,7 @@ se <- numa_shp@data %>%
     retail = RETAILEMP,
     nonretail = NONRETAILE
   ) %>%
-  left_join(numa_coords@data, by = "numa") %>%
+  left_join(numa_lookup, by = "numa") %>%
   gather(industry, count, hh:nonretail)
 
 # Use term -------
@@ -59,7 +32,7 @@ use_coefs <-
   gather(industry, value, -sctg) %>%
   
   # join se data and multiply coefficients
-  inner_join(se) %>%
+  inner_join(se, by = "industry") %>%
   mutate(size = value * count) %>%
   
   # sum all industries in taz
@@ -75,4 +48,4 @@ use_coefs <-
   select(county, sctg, numa, p)
 
 # output =======
-write_feather(use_coefs,  "data/simfiles/use_local.feather")
+write_feather(use_coefs, "data/simfiles/use_local.feather")

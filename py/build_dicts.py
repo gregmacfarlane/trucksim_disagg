@@ -74,6 +74,10 @@ if __name__ == "__main__":
         # instead of a multi-level dictionary like the others that this
         # script handles
         d = d.set_index('name').to_dict()
+    elif "dms_orig" in d:
+        # This is the trucks dictionary, which does not need to be put into a
+        # a dictionary
+        d = d
     else:
         if "F4Z" in d:
             if "sctg" in d:

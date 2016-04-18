@@ -510,7 +510,7 @@ if __name__ == "__main__":
 
     # Geographical points for the activity locations
     # also contains name-numa lookup for import export nodes
-    FAC_COORDS = pickle.load(open(simdir + "facility_coords.feather", "rb"))
+    FAC_COORDS = feather.read_dataframe(simdir + "facility_coords.feather")
 
     # To handle Alaska shipments appropriately, we need to have a list of
     # states/faf zones where the trucks will either drive down the coast to

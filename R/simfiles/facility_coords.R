@@ -17,7 +17,7 @@ numas_poly <- readShapePoly("data_raw/shapefiles/numa.shp",
 
 numas <- numas_poly@data %>%
   transmute(
-    name = as.character(ID),
+    name = as.character(FID_1),
     x = coordinates(numas_poly)[, 1],
     y = coordinates(numas_poly)[, 2]
   )

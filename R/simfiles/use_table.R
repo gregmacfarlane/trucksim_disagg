@@ -17,7 +17,7 @@ year <- 2012
 api_key <- "871EEC7A-11CB-4841-B062-3A66E6829522"
 
 uri <- paste(
-  "http://www.bea.gov/api/data/?&UserID=", api_key,
+  "https://www.bea.gov/api/data/?&UserID=", api_key,
   "&method=GetData&DataSetName=InputOutput&Year=", year, 
   "&tableID=", 46, "&ResultFormat=xml", sep = "")
 response <- httr::content(httr::GET(uri), type = "text/xml")
